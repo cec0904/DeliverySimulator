@@ -1,3 +1,4 @@
+using Invector.vCharacterController;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,6 +18,9 @@ using static UnityEngine.Rendering.DebugUI.Table;
 [RequireComponent(typeof(AudioSource))]
 public class Player : MonoBehaviour
 {
+    [Header("Invector Integration")]
+    private vThirdPersonInput invectorInput;
+
     [Header("Movements")]
     //Movements
     [Tooltip("Assign the player's rigidbody")]
@@ -355,6 +359,8 @@ public class Player : MonoBehaviour
     //Controller
     void Start()
     {
+        invectorInput = GetComponent<vThirdPersonInput>();
+
         Speed = NormalSpeed;
         Cursor.lockState = CursorLockMode.Locked;
         //Ragdoll
@@ -378,6 +384,8 @@ public class Player : MonoBehaviour
     {
         if(!ragdoll)
         {
+            HandleInvectorIntegration();
+
             //Move
             Move();
             //Jump
@@ -1902,6 +1910,46 @@ public class Player : MonoBehaviour
             GetComponent<AudioSource>().Stop();
         }
     }
+
+    private void HandleInvectorIntegration()
+    {
+        if (invectorInput == null) return;
+
+        bool isDoingParkour = Grabbing ||
+                             JumpingOver ||
+                             Sliding ||
+                             WallRunning ||
+                             ClimbingUp ||
+                             Rolling ||
+                             OnLader ||
+                             FlyingOver;
+
+        if (isDoingParkour)
+        {
+            if (invectorInput.enabled)
+            {
+                invectorInput.enabled = false;
+
+                if (rb != null)
+                {
+                    rb.useGravity = false;
+                }
+            }
+        }
+        else
+        {
+            if (!invectorInput.enabled)
+            {
+                invectorInput.enabled = true;
+
+                if (rb != null)
+                {
+                    rb.useGravity = true;
+                }
+            }
+        }
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.impulse.sqrMagnitude > 50)

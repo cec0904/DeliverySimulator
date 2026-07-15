@@ -59,17 +59,17 @@ namespace Invector.vCharacterController
 
         protected virtual void InitializeTpCamera()
         {
-            if (tpCamera != null) return;
-            
-            tpCamera = Object.FindAnyObjectByType<vThirdPersonCamera>();
-
-
-            if (tpCamera != null)
+            if (tpCamera == null)
             {
-                tpCamera.SetMainTarget(this.transform);
-                tpCamera.Init();
+                tpCamera = Object.FindAnyObjectByType<vThirdPersonCamera>();
+                if (tpCamera == null)
+                    return;
+                if (tpCamera)
+                {
+                    tpCamera.SetMainTarget(this.transform);
+                    tpCamera.Init();
+                }
             }
-            
         }
 
         protected virtual void InputHandle()

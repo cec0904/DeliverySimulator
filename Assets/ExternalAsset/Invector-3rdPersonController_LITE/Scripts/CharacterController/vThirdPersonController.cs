@@ -117,7 +117,7 @@ namespace Invector.vCharacterController
 
         public virtual void Jump()
         {
-            //if (DetectParkourObstacle()) return;
+            if (DetectParkourObstacle()) return;
 
             // trigger jump behaviour
             jumpCounter = jumpTimer;
@@ -132,13 +132,12 @@ namespace Invector.vCharacterController
         private bool DetectParkourObstacle()
         {
             RaycastHit hit;
-            // 1. 캐릭터의 가슴 높이 정도에서 앞으로 레이를 쏩니다.
+
             Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
 
             if (Physics.Raycast(rayOrigin, transform.forward, out hit, detectionDistance, obstacleLayer))
             {
-                // 2. 벽의 높이를 체크하기 위해 hit 지점에서 위쪽으로 레이를 한번 더 쏩니다.
-                // 이 로직을 통해 낮은 담장(Vault)인지 높은 벽(Climb)인지 구분할 수 있습니다.
+
                 float wallHeight = hit.collider.bounds.max.y - transform.position.y;
 
                 if (wallHeight > 1.5f) // 높은 벽
@@ -152,6 +151,7 @@ namespace Invector.vCharacterController
                     return true;
                 }
             }
+            if (isSprinting) isSprintJumping = true;
             return false;
         }
 

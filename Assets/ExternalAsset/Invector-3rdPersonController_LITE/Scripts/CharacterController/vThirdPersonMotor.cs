@@ -69,6 +69,7 @@ namespace Invector.vCharacterController
 
         // movement bools
         internal bool isJumping;
+        internal bool isSprintJumping;
         internal bool isStrafing
         {
             get

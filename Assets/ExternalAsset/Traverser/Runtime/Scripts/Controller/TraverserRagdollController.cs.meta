@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ac81c57d7ca573b48a185901200ad557
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 201063
+  packageName: Traverser - Player Traversal Toolkit
+  packageVersion: 2.0.0
+  assetPath: Assets/Traverser/Runtime/Scripts/Controller/TraverserRagdollController.cs
+  uploadId: 456725

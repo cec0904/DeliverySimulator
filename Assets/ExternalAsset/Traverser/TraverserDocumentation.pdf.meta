@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 79a92199e725c374889856ace69366e6
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 201063
+  packageName: Traverser - Player Traversal Toolkit
+  packageVersion: 2.0.0
+  assetPath: Assets/Traverser/TraverserDocumentation.pdf
+  uploadId: 456725

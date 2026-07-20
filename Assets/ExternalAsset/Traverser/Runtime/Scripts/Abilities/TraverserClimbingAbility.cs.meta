@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 281a5dfa61455e94fbe404ff1e632d9b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 201063
+  packageName: Traverser - Player Traversal Toolkit
+  packageVersion: 2.0.0
+  assetPath: Assets/Traverser/Runtime/Scripts/Abilities/TraverserClimbingAbility.cs
+  uploadId: 456725

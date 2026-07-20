@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 28955cab073b8d84db5fca90beb059e4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 201063
+  packageName: Traverser - Player Traversal Toolkit
+  packageVersion: 2.0.0
+  assetPath: Assets/Traverser/Runtime/Scripts/ScriptableObjects/ClimbingFreehangTransitionRagdollProfile.asset
+  uploadId: 456725

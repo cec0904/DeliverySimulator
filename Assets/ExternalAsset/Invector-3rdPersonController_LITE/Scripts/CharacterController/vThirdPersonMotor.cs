@@ -227,6 +227,12 @@ namespace Invector.vCharacterController
         {
             if (!jumpAndRotate && !isGrounded) return;
             direction.y = 0f;
+
+            if (direction.sqrMagnitude < 0.001f)
+            {
+                return;
+            }
+
             Vector3 desiredForward = Vector3.RotateTowards(transform.forward, direction.normalized, rotationSpeed * Time.deltaTime, .1f);
             Quaternion _newRotation = Quaternion.LookRotation(desiredForward);
             transform.rotation = _newRotation;

@@ -1,11 +1,19 @@
 ﻿using UnityEngine;
 
+
 namespace Invector.vCharacterController
 {
+
     public class vThirdPersonController : vThirdPersonAnimator
     {
         public LayerMask obstacleLayer;
         public float detectionDistance = 1.2f;
+
+        private PlayerParkourController parkourController;
+
+        public float maxObstacleCheckHeight = 2.5f;
+        public float topCheckStep = 0.1f;
+        public float maxObstacleLength = 5.0f;
 
         public virtual void ControlAnimatorRootMotion()
         {
@@ -117,7 +125,8 @@ namespace Invector.vCharacterController
 
         public virtual void Jump()
         {
-            if (DetectParkourObstacle()) return;
+            if (DetectParkourObstacle())
+                return;
 
             // trigger jump behaviour
             jumpCounter = jumpTimer;
@@ -131,28 +140,65 @@ namespace Invector.vCharacterController
         }
         private bool DetectParkourObstacle()
         {
-            RaycastHit hit;
+            parkourController ??= GetComponent<PlayerParkourController>();
+            if (parkourController == null) return false;
 
+            RaycastHit hit;
             Vector3 rayOrigin = transform.position + Vector3.up * 1.0f;
 
-            if (Physics.Raycast(rayOrigin, transform.forward, out hit, detectionDistance, obstacleLayer))
+            if (!Physics.Raycast(rayOrigin, transform.forward, out hit, detectionDistance, obstacleLayer))
             {
+                if (isSprinting) isSprintJumping = true;
+                return false;
+            }
 
-                float wallHeight = hit.collider.bounds.max.y - transform.position.y;
+            float obstacleHeight = hit.collider.bounds.max.y - transform.position.y;
 
-                if (wallHeight > 1.5f) // 높은 벽
+            if (!TryMeasureObstacleLength(hit.collider, hit.point, out float obstacleLength))
+                return false;
+
+            ParkourAction action = parkourController.DivisionParkour(obstacleHeight, obstacleLength, inputMagnitude);
+
+            if (action == ParkourAction.None)
+                return false;
+
+            parkourController.StartParkour(action);
+            return true;
+        }
+
+        private bool TryMeasureObstacleLength(Collider obstacle, Vector3 frontHitPoint, out float obstacleLength)
+        {
+            Vector3 topRayOrigin = frontHitPoint + transform.forward * 0.1f + Vector3.up * maxObstacleCheckHeight;
+
+            if (!Physics.Raycast(topRayOrigin, Vector3.down, out RaycastHit topHit, maxObstacleCheckHeight + 1.0f, obstacleLayer))
+            {
+                obstacleLength = 0f;
+                return false;
+            }
+
+            if (topHit.collider != obstacle)
+            {
+                obstacleLength = 0f;
+                return false;
+            }
+
+            Vector3 topStartPoint = topHit.point;
+
+            for (float distance = topCheckStep; distance <= maxObstacleLength; distance += topCheckStep)
+            {
+                Vector3 checkOrigin = topStartPoint + transform.forward * distance + Vector3.up * 0.5f;
+
+                bool hasSurface = Physics.Raycast(checkOrigin, Vector3.down, out RaycastHit surfaceHit, 1.0f, obstacleLayer);
+
+                if (!hasSurface || surfaceHit.collider != obstacle)
                 {
-                    StartClimbAction(1); // ClimbingUp (State 1)
-                    return true;
-                }
-                else if (wallHeight > 0.5f) // 낮은 담장
-                {
-                    StartClimbAction(2); // Vault/JumpOver (State 2)
+                    obstacleLength = distance - topCheckStep;
                     return true;
                 }
             }
-            if (isSprinting) isSprintJumping = true;
-            return false;
+
+            obstacleLength = maxObstacleLength;
+            return true;
         }
 
         private void StartClimbAction(int stateID)
@@ -167,6 +213,8 @@ namespace Invector.vCharacterController
             //// 벽을 타는 동안 리지드바디 속도 초기화 (위로 튀는 현상 방지)
             //rb.velocity = Vector3.zero;
         }
+
+        
 
     }
 

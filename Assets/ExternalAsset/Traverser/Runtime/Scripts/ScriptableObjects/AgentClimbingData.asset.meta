@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b678b7f44b1c9824fadc2b58a3fd82d6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 201063
+  packageName: Traverser - Player Traversal Toolkit
+  packageVersion: 2.0.0
+  assetPath: Assets/Traverser/Runtime/Scripts/ScriptableObjects/AgentClimbingData.asset
+  uploadId: 456725

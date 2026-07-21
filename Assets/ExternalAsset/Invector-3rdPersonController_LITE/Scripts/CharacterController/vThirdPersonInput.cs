@@ -10,6 +10,7 @@ namespace Invector.vCharacterController
         public string horizontalInput = "Horizontal";
         public string verticallInput = "Vertical";
         public KeyCode jumpInput = KeyCode.Space;
+        public KeyCode climbInput = KeyCode.C;
         public KeyCode strafeInput = KeyCode.Tab;
         public KeyCode sprintInput = KeyCode.LeftShift;
 
@@ -31,9 +32,14 @@ namespace Invector.vCharacterController
 
         protected virtual void FixedUpdate()
         {
-            cc.UpdateMotor();               // updates the ThirdPersonMotor methods
-            cc.ControlLocomotionType();     // handle the controller locomotion type and movespeed
-            cc.ControlRotationType();       // handle the controller rotation type
+            if (cc == null || cc.isParkouring)
+            {
+                return;
+            }
+
+            cc.UpdateMotor();
+            cc.ControlLocomotionType();
+            cc.ControlRotationType();
         }
 
         protected virtual void Update()
@@ -62,8 +68,12 @@ namespace Invector.vCharacterController
             if (tpCamera == null)
             {
                 tpCamera = Object.FindAnyObjectByType<vThirdPersonCamera>();
+
                 if (tpCamera == null)
+                {
                     return;
+                }
+
                 if (tpCamera)
                 {
                     tpCamera.SetMainTarget(this.transform);
@@ -74,8 +84,14 @@ namespace Invector.vCharacterController
 
         protected virtual void InputHandle()
         {
-            MoveInput();
             CameraInput();
+
+            if (cc.isParkouring)
+            {
+                return;
+            }
+
+            MoveInput();
             SprintInput();
             StrafeInput();
             JumpInput();
@@ -105,7 +121,9 @@ namespace Invector.vCharacterController
             }
 
             if (tpCamera == null)
+            {
                 return;
+            }
 
             var Y = Input.GetAxis(rotateCameraYInput);
             var X = Input.GetAxis(rotateCameraXInput);
@@ -116,7 +134,9 @@ namespace Invector.vCharacterController
         protected virtual void StrafeInput()
         {
             if (Input.GetKeyDown(strafeInput))
+            {
                 cc.Strafe();
+            }
         }
 
         protected virtual void SprintInput()
@@ -141,8 +161,16 @@ namespace Invector.vCharacterController
         /// </summary>
         protected virtual void JumpInput()
         {
+            if (Input.GetKeyDown(climbInput) && JumpConditions())
+            {
+                cc.Climb();
+                return;
+            }
+
             if (Input.GetKeyDown(jumpInput) && JumpConditions())
+            {
                 cc.Jump();
+            }
         }
 
         #endregion       

@@ -55,6 +55,7 @@ public class PlayerParkourController : MonoBehaviour
 
     private void Awake()
     {
+
         animator = GetComponent<Animator>();
         controller = GetComponent<vThirdPersonController>();
     }
@@ -86,6 +87,8 @@ public class PlayerParkourController : MonoBehaviour
 
     public void StartParkour(ParkourAction action, ParkourTargetData target, VaultSlideType slideType = VaultSlideType.Top)
     {
+  
+
         if (action == ParkourAction.None || controller == null || controller.isParkouring)
         {
             return;
@@ -101,6 +104,7 @@ public class PlayerParkourController : MonoBehaviour
 
     private IEnumerator RunParkour(ParkourAction action, ParkourTargetData target, VaultSlideType slideType)
     {
+
         parkourActive = true;
         finalRotation = target.facingRotation;
 

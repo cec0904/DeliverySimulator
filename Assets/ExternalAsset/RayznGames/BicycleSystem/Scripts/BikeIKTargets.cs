@@ -16,21 +16,52 @@ namespace rayzngames
         [SerializeField] Transform rightHandTarget;
         [SerializeField] Vector3 rightHandRotation = new Vector3(0, 0, 0);
         [SerializeField] Transform leftFootTarget;
+        [SerializeField] Vector3 leftFootRotation = new Vector3(0, 0, 0);
         [SerializeField] Transform rightFootTarget;
+        [SerializeField] Vector3 rightFootRotation = new Vector3(0, 0, 0);
 
-        // Update is called once per frame
+        void OnEnable()
+        {
+            ApplyTargets();
+        }
+
         void Update()
         {
-            //Hands
-            leftHandTarget.position = handleLeft.position;
-            leftHandTarget.localEulerAngles = handleLeft.localRotation.eulerAngles + leftHandRotation;
+            ApplyTargets();
+        }
 
-            rightHandTarget.position = handleRight.position;
-            rightHandTarget.localEulerAngles = handleRight.localRotation.eulerAngles + rightHandRotation;
+        public void ApplyTargets()
+        {
+            ApplyTarget(handleLeft, leftHandTarget, leftHandRotation);
+            ApplyTarget(handleRight, rightHandTarget, rightHandRotation);
+            ApplyTarget(pedalLeft, leftFootTarget, leftFootRotation);
+            ApplyTarget(pedalRight, rightFootTarget, rightFootRotation);
+        }
 
-            //Feet
-            leftFootTarget.position = pedalLeft.position;
-            rightFootTarget.position = pedalRight.position;
+        public void ApplyScooterGripRotationIfUnset()
+        {
+            // The custom scooter markers currently contain identity rotations.
+            // These are the grip-axis corrections used by the package scooter rig.
+            if (leftHandRotation.sqrMagnitude < 0.0001f)
+            {
+                leftHandRotation = new Vector3(0f, 90f, 90f);
+            }
+
+            if (rightHandRotation.sqrMagnitude < 0.0001f)
+            {
+                rightHandRotation = new Vector3(0f, -90f, -90f);
+            }
+        }
+
+        static void ApplyTarget(Transform source, Transform target, Vector3 rotationOffset)
+        {
+            if (source == null || target == null)
+            {
+                return;
+            }
+
+            Quaternion targetRotation = source.rotation * Quaternion.Euler(rotationOffset);
+            target.SetPositionAndRotation(source.position, targetRotation);
         }
     }
 }

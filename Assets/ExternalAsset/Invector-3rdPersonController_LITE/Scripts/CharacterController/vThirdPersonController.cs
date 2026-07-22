@@ -617,7 +617,7 @@ namespace Invector.vCharacterController
 
             isParkouring = true;
             lockMovement = true;
-            lockRotation = true;
+            lockRotation = true; 
 
             isSprinting = false;
             isJumping = false;

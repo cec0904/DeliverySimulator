@@ -21,6 +21,7 @@ namespace Invector.vCharacterController
         [HideInInspector] public vThirdPersonController cc;
         [HideInInspector] public vThirdPersonCamera tpCamera;
         [HideInInspector] public Camera cameraMain;
+        [HideInInspector] public bool lockCharacterInput;
 
         #endregion
 
@@ -32,7 +33,7 @@ namespace Invector.vCharacterController
 
         protected virtual void FixedUpdate()
         {
-            if (cc == null || cc.isParkouring)
+            if (cc == null || cc.isParkouring || lockCharacterInput)
             {
                 return;
             }
@@ -86,7 +87,7 @@ namespace Invector.vCharacterController
         {
             CameraInput();
 
-            if (cc.isParkouring)
+            if (cc.isParkouring || lockCharacterInput)
             {
                 return;
             }

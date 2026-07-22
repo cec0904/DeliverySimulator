@@ -9,7 +9,7 @@ public class QuestManager : MonoBehaviour
     public QuestGenerator questGenerator;
     public QuestOfferUI offerUI;
 
-    public float offerInterval = 5.0f;
+    public float offerInterval = 100.0f;
 
     //gameover count?
     public int maxActiveQuestCount = 5;
@@ -53,10 +53,11 @@ public class QuestManager : MonoBehaviour
         {
             Debug.Log("[퀘스트 제안 스킵] 이미 진행 중인 퀘스트가 가득 찼습니다.");
             return;
+            // 게임 오버
         }
 
 
-        // 1. 임시 1회용 runtimeQuest 생성
+        // 1. 임시 runtimeQuest 생성
         QuestDataSO runtimeQuest = questGenerator.GenerateRandomQuest();
 
         if (runtimeQuest != null)

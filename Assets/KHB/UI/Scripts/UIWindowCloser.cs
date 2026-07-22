@@ -17,7 +17,15 @@ public class UIWindowCloser : MonoBehaviour
     {
         if (targetWindow != null)
         {
-            targetWindow.SetActive(false);
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ClosePanel(targetWindow);
+            }
+            else
+            {
+                // UIManager가 씬에 없을 경우를 대비한 안전 장치 (Fallback)
+                targetWindow.SetActive(false);
+            }
         }
     }
 }

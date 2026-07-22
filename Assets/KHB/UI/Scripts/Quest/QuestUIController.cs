@@ -26,9 +26,6 @@ public class QuestUIController : MonoBehaviour
         titleText.text = newQuest.questTitle;
         descriptionText.text = newQuest.questDescription;
 
-        // 💡 팁: 데이터가 바뀌어 글자 수가 변했을 때 
-        // 간혹 Layout 컴포넌트들이 즉시 크기 계산을 못 할 때가 있습니다.
-        // 아래 코드를 한 줄 넣어주면 강제로 레이아웃을 즉시 재계산해 스크롤바가 알맞게 조절됩니다.
         Canvas.ForceUpdateCanvases();
     }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 33808967149919378}
   - component: {fileID: 23951317768635522}
   - component: {fileID: 64801915562529758}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Sidewalk_08
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,7 +124,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4665886090133042}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Sideway 8 prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -9974,7 +9974,7 @@ MonoBehaviour:
   dismountLocalPosition: {x: -1.25, y: 0, z: 0}
   dismountKey: 102
   inputCooldown: 0.25
-  mountedAnimatorState: Free Locomotion
+  mountedAnimatorState: Free Crouch
   locomotionAnimatorState: Free Locomotion
 --- !u!1 &1412111348330460788
 GameObject:

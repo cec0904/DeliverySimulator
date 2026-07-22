@@ -19,20 +19,29 @@ public sealed class MotorbikeMount : Interactable
     [SerializeField, Min(0f)] private float inputCooldown = 0.25f;
 
     [Header("Optional Animation")]
-    [SerializeField] private string mountedAnimatorState = "Free Locomotion";
+    [SerializeField] private string mountedAnimatorState = "Free Crouch";
     [SerializeField] private string locomotionAnimatorState = "Free Locomotion";
 
     private BicycleVehicle bicycle;
     private BikeControlsExample bikeControls;
+    private Rigidbody bikeRigidbody;
+    private RigidbodyConstraints bikeConstraintsBeforeMount;
+    private BikeIKTargets bikeIKTargets;
+    private RiderBikeIKState riderBikeIKState;
     private Transform rider;
     private Transform riderOriginalParent;
     private Rigidbody riderRigidbody;
     private Collider[] riderColliders;
     private bool[] riderColliderStates;
     private vThirdPersonInput riderInput;
+    private vThirdPersonMotor[] riderControllers;
+    private bool[] riderControllerStates;
+    private bool[] riderMovementLockStates;
+    private bool[] riderRotationLockStates;
     private PlayerParkourController riderParkour;
     private Animator riderAnimator;
     private vThirdPersonCamera thirdPersonCamera;
+    private bool riderCharacterInputWasLocked;
     private bool riderInputWasEnabled;
     private bool riderParkourWasEnabled;
     private bool riderRigidbodyWasKinematic;
@@ -47,6 +56,14 @@ public sealed class MotorbikeMount : Interactable
     {
         bicycle = GetComponent<BicycleVehicle>();
         bikeControls = GetComponent<BikeControlsExample>();
+        bikeRigidbody = GetComponent<Rigidbody>();
+        bikeIKTargets = GetComponent<BikeIKTargets>();
+
+        if (bikeIKTargets != null)
+        {
+            bikeIKTargets.enabled = false;
+        }
+
         promptMessage = "오토바이에 탑승하려면 F를 누르세요.";
         SetBikeControl(false);
     }
@@ -66,6 +83,24 @@ public sealed class MotorbikeMount : Interactable
         }
     }
 
+    private void FixedUpdate()
+    {
+        if (rider == null || bikeRigidbody == null)
+        {
+            return;
+        }
+
+        // Keep steering around Y, but stop the scooter from pitching or rolling over.
+        RigidbodyConstraints mountedConstraints = bikeConstraintsBeforeMount | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        mountedConstraints &= ~RigidbodyConstraints.FreezeRotationY;
+        bikeRigidbody.constraints = mountedConstraints;
+
+        Vector3 angularVelocity = bikeRigidbody.angularVelocity;
+        angularVelocity.x = 0f;
+        angularVelocity.z = 0f;
+        bikeRigidbody.angularVelocity = angularVelocity;
+    }
+
     public override void Interact(GameObject interactor)
     {
         if (interactor == null || Time.time < nextInputTime)
@@ -83,24 +118,37 @@ public sealed class MotorbikeMount : Interactable
         }
     }
 
+    // 오토바이 탑승
     private void Mount(Transform newRider)
     {
         rider = newRider;
         riderOriginalParent = rider.parent;
         riderInput = rider.GetComponent<vThirdPersonInput>();
+        riderControllers = rider.GetComponents<vThirdPersonMotor>();
+        riderControllerStates = new bool[riderControllers.Length];
+        riderMovementLockStates = new bool[riderControllers.Length];
+        riderRotationLockStates = new bool[riderControllers.Length];
         riderParkour = rider.GetComponent<PlayerParkourController>();
         riderAnimator = rider.GetComponent<Animator>();
         riderRigidbody = rider.GetComponent<Rigidbody>();
+        riderBikeIKState = rider.GetComponent<RiderBikeIKState>();
+        if (riderBikeIKState == null)
+        {
+            riderBikeIKState = rider.gameObject.AddComponent<RiderBikeIKState>();
+        }
+
         riderColliders = rider.GetComponentsInChildren<Collider>(true);
         riderColliderStates = new bool[riderColliders.Length];
+
+
 
         if (riderInput != null)
         {
             riderInputWasEnabled = riderInput.enabled;
-            thirdPersonCamera = riderInput.tpCamera != null
-                ? riderInput.tpCamera
-                : Object.FindAnyObjectByType<vThirdPersonCamera>();
-            riderInput.enabled = false;
+            riderCharacterInputWasLocked = riderInput.lockCharacterInput;
+
+            thirdPersonCamera = riderInput.tpCamera != null ? riderInput.tpCamera : Object.FindAnyObjectByType<vThirdPersonCamera>();
+            riderInput.lockCharacterInput = true;
         }
 
         if (riderParkour != null)
@@ -108,6 +156,18 @@ public sealed class MotorbikeMount : Interactable
             riderParkourWasEnabled = riderParkour.enabled;
             riderParkour.EndParkour();
             riderParkour.enabled = false;
+        }
+
+        for (int i = 0; i < riderControllers.Length; i++)
+        {
+            vThirdPersonMotor controller = riderControllers[i];
+            riderControllerStates[i] = controller.enabled;
+            riderMovementLockStates[i] = controller.lockMovement;
+            riderRotationLockStates[i] = controller.lockRotation;
+
+            ResetRiderControllerState(controller);
+            controller.lockMovement = true;
+            controller.lockRotation = true;
         }
 
         if (riderRigidbody != null)
@@ -137,7 +197,23 @@ public sealed class MotorbikeMount : Interactable
         rider.SetParent(mountPoint != null ? mountPoint : transform, false);
         ApplyRiderMountPose();
 
+        if (bikeRigidbody != null)
+        {
+            bikeConstraintsBeforeMount = bikeRigidbody.constraints;
+            bikeRigidbody.angularVelocity = Vector3.zero;
+        }
+
+        if (bikeIKTargets != null)
+        {
+            bikeIKTargets.ApplyScooterGripRotationIfUnset();
+            bikeIKTargets.enabled = true;
+            bikeIKTargets.ApplyTargets();
+        }
+
+        riderBikeIKState.SetMounted(true);
+
         SetBikeControl(true);
+
         SetCameraTarget(cameraTarget != null ? cameraTarget : transform);
         promptMessage = "오토바이에서 내리려면 F를 누르세요.";
         nextInputTime = Time.time + inputCooldown;
@@ -156,17 +232,61 @@ public sealed class MotorbikeMount : Interactable
             : Quaternion.Euler(mountLocalEulerAngles);
     }
 
+    // 오토바이 하차
     private void Dismount()
     {
         Transform departingRider = rider;
+
         Vector3 exitPosition = dismountPoint != null
             ? dismountPoint.position
             : transform.TransformPoint(dismountLocalPosition);
-        Quaternion exitRotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+
+        Quaternion exitRotation =
+            Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+
+        if (riderBikeIKState != null)
+        {
+            riderBikeIKState.SetMounted(false);
+        }
+
+        if (bikeIKTargets != null)
+        {
+            bikeIKTargets.enabled = false;
+        }
 
         SetBikeControl(false);
+
+        if (bikeRigidbody != null)
+        {
+            bikeRigidbody.angularVelocity = Vector3.zero;
+            bikeRigidbody.constraints = bikeConstraintsBeforeMount;
+        }
+
         departingRider.SetParent(riderOriginalParent, true);
         departingRider.SetPositionAndRotation(exitPosition, exitRotation);
+
+        // Restore controller input state before re-enabling player input.
+        for (int i = 0; i < riderControllers.Length; i++)
+        {
+            if (riderControllers[i] == null)
+            {
+                continue;
+            }
+
+            ResetRiderControllerState(riderControllers[i]);
+            riderControllers[i].lockMovement = riderMovementLockStates[i];
+            riderControllers[i].lockRotation = riderRotationLockStates[i];
+            riderControllers[i].enabled = riderControllerStates[i];
+        }
+
+        // Restore Rigidbody and collider participation in the physics world.
+        if (riderRigidbody != null)
+        {
+            riderRigidbody.isKinematic = riderRigidbodyWasKinematic;
+            riderRigidbody.detectCollisions = riderRigidbodyDetectedCollisions;
+            riderRigidbody.linearVelocity = Vector3.zero;
+            riderRigidbody.angularVelocity = Vector3.zero;
+        }
 
         for (int i = 0; i < riderColliders.Length; i++)
         {
@@ -176,17 +296,24 @@ public sealed class MotorbikeMount : Interactable
             }
         }
 
-        if (riderRigidbody != null)
+        Physics.SyncTransforms();
+
+        if (riderRigidbody != null && !riderRigidbody.isKinematic)
         {
-            riderRigidbody.isKinematic = riderRigidbodyWasKinematic;
-            riderRigidbody.detectCollisions = riderRigidbodyDetectedCollisions;
+            riderRigidbody.WakeUp();
         }
 
+        // Animator 복구
         if (riderAnimator != null)
         {
             riderAnimator.speed = riderAnimatorSpeed;
             riderAnimator.applyRootMotion = riderAnimatorAppliedRootMotion;
-            PlayStateIfAvailable(riderAnimator, locomotionAnimatorState);
+
+            riderAnimator.SetFloat("InputMagnitude", 0f);
+            riderAnimator.SetFloat("InputHorizontal", 0f);
+            riderAnimator.SetFloat("InputVertical", 0f);
+            riderAnimator.SetBool("IsSprinting", false);
+
             riderAnimator.Update(0f);
         }
 
@@ -197,13 +324,25 @@ public sealed class MotorbikeMount : Interactable
 
         if (riderInput != null)
         {
+            riderInput.lockCharacterInput = riderCharacterInputWasLocked;
             riderInput.enabled = riderInputWasEnabled;
         }
 
         SetCameraTarget(departingRider);
+
         rider = null;
         promptMessage = "오토바이에 탑승하려면 F를 누르세요.";
         nextInputTime = Time.time + inputCooldown;
+    }
+
+    private static void ResetRiderControllerState(vThirdPersonMotor controller)
+    {
+        controller.input = Vector3.zero;
+        controller.inputSmooth = Vector3.zero;
+        controller.moveDirection = Vector3.zero;
+        controller.isJumping = false;
+        controller.isSprintJumping = false;
+        controller.isSprinting = false;
     }
 
     private void SetBikeControl(bool active)
@@ -217,7 +356,7 @@ public sealed class MotorbikeMount : Interactable
         bicycle.horizontalInput = 0f;
         bicycle.verticalInput = 0f;
         bicycle.braking = !active;
-        bicycle.InControl(true);
+        bicycle.InControl(active);
 
         if (!active)
         {
@@ -246,7 +385,7 @@ public sealed class MotorbikeMount : Interactable
         animator.SetBool(Animator.StringToHash("IsSprinting"), false);
         animator.SetBool(Animator.StringToHash("IsStrafing"), false);
 
-        PlayStateIfAvailable(animator, mountedAnimatorState);
+       // PlayStateIfAvailable(animator, mountedAnimatorState);
         animator.Update(0f);
         animator.speed = 0f;
     }

@@ -38,20 +38,7 @@ namespace rayzngames
             ApplyTarget(pedalRight, rightFootTarget, rightFootRotation);
         }
 
-        public void ApplyScooterGripRotationIfUnset()
-        {
-            // The custom scooter markers currently contain identity rotations.
-            // These are the grip-axis corrections used by the package scooter rig.
-            if (leftHandRotation.sqrMagnitude < 0.0001f)
-            {
-                leftHandRotation = new Vector3(0f, 90f, 90f);
-            }
-
-            if (rightHandRotation.sqrMagnitude < 0.0001f)
-            {
-                rightHandRotation = new Vector3(0f, -90f, -90f);
-            }
-        }
+        
 
         static void ApplyTarget(Transform source, Transform target, Vector3 rotationOffset)
         {

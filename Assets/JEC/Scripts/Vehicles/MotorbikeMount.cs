@@ -1,6 +1,7 @@
 using Invector.vCharacterController;
 using rayzngames;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(BicycleVehicle))]
@@ -50,7 +51,42 @@ public sealed class MotorbikeMount : Interactable
     private float riderAnimatorSpeed;
     private float nextInputTime;
 
+    private Transform packagedRiderPose;
+    private Transform packagedLeftHandTarget;
+    private Transform packagedRightHandTarget;
+    private Transform packagedLeftFootTarget;
+    private Transform packagedRightFootTarget;
+    private Transform packagedLeftElbowHint;
+    private Transform packagedRightElbowHint;
+    private Transform packagedLeftKneeHint;
+    private Transform packagedRightKneeHint;
+
     public bool IsMounted => rider != null;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    private static void AddMountSupportToPackagedBikeRigs()
+    {
+        BicycleVehicle[] bicycles = Object.FindObjectsByType<BicycleVehicle>(FindObjectsInactive.Include);
+
+        for (int i = 0; i < bicycles.Length; i++)
+        {
+            BicycleVehicle candidate = bicycles[i];
+            if (candidate.GetComponent<MotorbikeMount>() != null)
+            {
+                continue;
+            }
+
+            Transform candidateTransform = candidate.transform;
+            if (FindChildByName(candidateTransform, "Rag_Rig_URP") != null &&
+                FindChildByName(candidateTransform, "Hand_L_target") != null &&
+                FindChildByName(candidateTransform, "Hand_R_target") != null &&
+                FindChildByName(candidateTransform, "Feet_L_target") != null &&
+                FindChildByName(candidateTransform, "Feet_R_target") != null)
+            {
+                candidate.gameObject.AddComponent<MotorbikeMount>();
+            }
+        }
+    }
 
     private void Awake()
     {
@@ -58,6 +94,8 @@ public sealed class MotorbikeMount : Interactable
         bikeControls = GetComponent<BikeControlsExample>();
         bikeRigidbody = GetComponent<Rigidbody>();
         bikeIKTargets = GetComponent<BikeIKTargets>();
+        ResolvePackagedRigReferences();
+        DisablePackagedRider();
 
         if (bikeIKTargets != null)
         {
@@ -205,9 +243,21 @@ public sealed class MotorbikeMount : Interactable
 
         if (bikeIKTargets != null)
         {
-            bikeIKTargets.ApplyScooterGripRotationIfUnset();
             bikeIKTargets.enabled = true;
             bikeIKTargets.ApplyTargets();
+        }
+
+        if (packagedRiderPose != null)
+        {
+            riderBikeIKState.BindBikeTargets(
+                packagedLeftHandTarget,
+                packagedRightHandTarget,
+                packagedLeftFootTarget,
+                packagedRightFootTarget,
+                packagedLeftElbowHint,
+                packagedRightElbowHint,
+                packagedLeftKneeHint,
+                packagedRightKneeHint);
         }
 
         riderBikeIKState.SetMounted(true);
@@ -226,10 +276,21 @@ public sealed class MotorbikeMount : Interactable
             return;
         }
 
-        rider.localPosition = mountPoint != null ? Vector3.zero : mountLocalPosition;
-        rider.localRotation = mountPoint != null
-            ? Quaternion.identity
-            : Quaternion.Euler(mountLocalEulerAngles);
+        if (mountPoint != null)
+        {
+            rider.localPosition = Vector3.zero;
+            rider.localRotation = Quaternion.identity;
+        }
+        else if (packagedRiderPose != null)
+        {
+            rider.localPosition = packagedRiderPose.localPosition;
+            rider.localRotation = packagedRiderPose.localRotation;
+        }
+        else
+        {
+            rider.localPosition = mountLocalPosition;
+            rider.localRotation = Quaternion.Euler(mountLocalEulerAngles);
+        }
     }
 
     // 오토바이 하차
@@ -409,6 +470,71 @@ public sealed class MotorbikeMount : Interactable
         {
             animator.Play(fullPathHash, 0, 0f);
         }
+    }
+
+    private void ResolvePackagedRigReferences()
+    {
+        packagedRiderPose = FindChildByName(transform, "Rag_Rig_URP");
+        if (packagedRiderPose == null)
+        {
+            return;
+        }
+
+        packagedLeftHandTarget = FindChildByName(packagedRiderPose, "Hand_L_target");
+        packagedRightHandTarget = FindChildByName(packagedRiderPose, "Hand_R_target");
+        packagedLeftFootTarget = FindChildByName(packagedRiderPose, "Feet_L_target");
+        packagedRightFootTarget = FindChildByName(packagedRiderPose, "Feet_R_target");
+        packagedLeftElbowHint = FindChildByName(packagedRiderPose, "Hand_L_hint");
+        packagedRightElbowHint = FindChildByName(packagedRiderPose, "Hand_R_hint");
+        packagedLeftKneeHint = FindChildByName(packagedRiderPose, "Feet_L_hint");
+        packagedRightKneeHint = FindChildByName(packagedRiderPose, "Feet_R_hint");
+    }
+
+    private void DisablePackagedRider()
+    {
+        if (packagedRiderPose == null)
+        {
+            return;
+        }
+
+        Renderer[] renderers = packagedRiderPose.GetComponentsInChildren<Renderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            renderers[i].enabled = false;
+        }
+
+        Collider[] colliders = packagedRiderPose.GetComponentsInChildren<Collider>(true);
+        for (int i = 0; i < colliders.Length; i++)
+        {
+            colliders[i].enabled = false;
+        }
+
+        Animator packagedAnimator = packagedRiderPose.GetComponent<Animator>();
+        if (packagedAnimator != null)
+        {
+            packagedAnimator.enabled = false;
+        }
+
+        RigBuilder packagedRigBuilder = packagedRiderPose.GetComponent<RigBuilder>();
+        if (packagedRigBuilder != null)
+        {
+            packagedRigBuilder.Clear();
+            packagedRigBuilder.enabled = false;
+        }
+    }
+
+    private static Transform FindChildByName(Transform root, string childName)
+    {
+        Transform[] children = root.GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < children.Length; i++)
+        {
+            if (children[i].name == childName)
+            {
+                return children[i];
+            }
+        }
+
+        return null;
     }
 
     private void OnDrawGizmosSelected()

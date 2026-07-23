@@ -996,6 +996,37 @@ Transform:
   - {fileID: 606045709403568892}
   m_Father: {fileID: 6504002480527729130}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &7063575495728262061
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1368936848730688458}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1368936848730688458
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7063575495728262061}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3.5424707, y: 0, z: 3.458251}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7039721667947540033}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7207319694963886403
 GameObject:
   m_ObjectHideFlags: 0
@@ -1100,6 +1131,7 @@ Transform:
   m_Children:
   - {fileID: 6850557608853230922}
   - {fileID: 8614608882122323171}
+  - {fileID: 1368936848730688458}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7763310855623681509
@@ -1112,7 +1144,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b74f4ff80d113374fb65bf806f887874, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Invector.vCharacterController.vThirdPersonAnimator
   useRootMotion: 0
   rotateByWorld: 0
@@ -1216,6 +1248,15 @@ MonoBehaviour:
   parkourDetectionRadius: 0.15
   maxParkourHeight: 4.25
   topProbePadding: 0.5
+  vaultProbeHeight: 0.75
+  vaultSupportProbeHeight: 0.25
+  climbHandProbeHeight: 1.7
+  climbSupportProbeHeight: 0.6
+  climbMaximumUpNormal: 0.3
+  slideStandingProbeHeight: 1.7
+  slideEntryDepth: 0.45
+  slideClearancePadding: 0.05
+  slideGroundProbeHeight: 1
   parkourColliderHeight: 1.2
 --- !u!114 &2070145114302374268
 MonoBehaviour:
@@ -1232,6 +1273,7 @@ MonoBehaviour:
   horizontalInput: Horizontal
   verticallInput: Vertical
   jumpInput: 32
+  climbInput: 99
   strafeInput: 9
   sprintInput: 304
   rotateCameraXInput: Mouse X
@@ -1239,6 +1281,7 @@ MonoBehaviour:
   cc: {fileID: 0}
   tpCamera: {fileID: 0}
   cameraMain: {fileID: 0}
+  lockCharacterInput: 0
 --- !u!114 &1451493637396568066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1375,9 +1418,14 @@ MonoBehaviour:
   animator: {fileID: 1414152150808239082}
   alignmentDuration: 0.12
   slideSpeed: 3.5
-  minimumSlideLoopDuration: 0.15
+  slideExitClearance: 0.5
   vaultArcHeight: 0.45
   climbClearance: 0.3
+  climbArrivalNormalizedTime: 0.78
+  vaultToTopArrivalNormalizedTime: 0.64
+  vaultArrivalNormalizedTime: 0.88
+  animatorStateTimeout: 0.5
+  arrivalDistance: 0.05
 --- !u!114 &9001265347812400152
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1405,9 +1453,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6f53a45ed3ae43f7b6713974998bd21b, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RiderBikeIKState
   riderRigObjectName: RiderIK
+  leftElbowHintName: LeftElbowHint
+  rightElbowHintName: RightElbowHint
 --- !u!1 &7765998170717521612
 GameObject:
   m_ObjectHideFlags: 0

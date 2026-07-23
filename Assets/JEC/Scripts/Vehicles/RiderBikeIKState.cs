@@ -11,13 +11,33 @@ public sealed class RiderBikeIKState : MonoBehaviour
 
     private Rig riderRig;
     private RigBuilder rigBuilder;
-    private bool rigRequiresRebuild;
+    private Animator animator;
+    private Transform leftHandTarget;
+    private Transform rightHandTarget;
+    private Transform leftFootTarget;
+    private Transform rightFootTarget;
+    private Transform leftElbowHint;
+    private Transform rightElbowHint;
+    private Transform leftKneeHint;
+    private Transform rightKneeHint;
 
     private void OnEnable()
     {
         ResolveRig();
-        rigRequiresRebuild = ConnectArmHint("LeftArmIK", leftElbowHintName) |
-                             ConnectArmHint("RightArmIK", rightElbowHintName);
+        rigBuilder = GetComponent<RigBuilder>();
+        animator = GetComponent<Animator>();
+        ResolveHumanoidTargets();
+
+        // A zero-weight TwoBoneIK job still touches its stream handles. The
+        // Humanoid Animator IK callback below replaces this graph at runtime.
+        if (rigBuilder != null)
+        {
+            rigBuilder.enabled = false;
+        }
+
+        ConnectArmHint("LeftArmIK", leftElbowHintName);
+        ConnectArmHint("RightArmIK", rightElbowHintName);
+        ResolveHumanoidTargets();
     }
 
     private void Awake()
@@ -26,24 +46,27 @@ public sealed class RiderBikeIKState : MonoBehaviour
         SetMounted(false);
     }
 
-    private void Start()
-    {
-        if (!rigRequiresRebuild)
-        {
-            return;
-        }
-
-        rigBuilder = GetComponent<RigBuilder>();
-        if (rigBuilder != null)
-        {
-            // The hint Transform is part of the Animation Rigging job data, so a
-            // graph built before the hint was assigned has to be rebuilt once.
-            rigBuilder.Clear();
-            rigBuilder.Build();
-        }
-    }
-
     public bool IsMounted { get; private set; }
+
+    public void BindBikeTargets(
+        Transform newLeftHandTarget,
+        Transform newRightHandTarget,
+        Transform newLeftFootTarget,
+        Transform newRightFootTarget,
+        Transform newLeftElbowHint,
+        Transform newRightElbowHint,
+        Transform newLeftKneeHint,
+        Transform newRightKneeHint)
+    {
+        leftHandTarget = newLeftHandTarget;
+        rightHandTarget = newRightHandTarget;
+        leftFootTarget = newLeftFootTarget;
+        rightFootTarget = newRightFootTarget;
+        leftElbowHint = newLeftElbowHint;
+        rightElbowHint = newRightElbowHint;
+        leftKneeHint = newLeftKneeHint;
+        rightKneeHint = newRightKneeHint;
+    }
 
     public void SetMounted(bool mounted)
     {
@@ -52,9 +75,20 @@ public sealed class RiderBikeIKState : MonoBehaviour
         ResolveRig();
 
         if (riderRig != null)
+            riderRig.weight = 0f;
+
+        if (rigBuilder == null)
         {
-            riderRig.weight = mounted ? 1f : 0f;
+            rigBuilder = GetComponent<RigBuilder>();
         }
+
+        if (rigBuilder == null)
+        {
+            return;
+        }
+
+        rigBuilder.Clear();
+        rigBuilder.enabled = false;
     }
 
     private void ResolveRig()
@@ -78,6 +112,76 @@ public sealed class RiderBikeIKState : MonoBehaviour
         {
             riderRig = rigs[0];
         }
+    }
+
+    private void ResolveHumanoidTargets()
+    {
+        if (riderRig == null)
+            return;
+
+        foreach (TwoBoneIKConstraint constraint in riderRig.GetComponentsInChildren<TwoBoneIKConstraint>(true))
+        {
+            TwoBoneIKConstraintData data = constraint.data;
+            switch (constraint.gameObject.name)
+            {
+                case "Hand_L":
+                case "LeftArmIK":
+                    leftHandTarget = data.target;
+                    leftElbowHint = data.hint;
+                    break;
+                case "Hand_R":
+                case "RightArmIK":
+                    rightHandTarget = data.target;
+                    rightElbowHint = data.hint;
+                    break;
+                case "Feet_L":
+                case "LeftLegIK":
+                    leftFootTarget = data.target;
+                    leftKneeHint = data.hint;
+                    break;
+                case "Feet_R":
+                case "RightLegIK":
+                    rightFootTarget = data.target;
+                    rightKneeHint = data.hint;
+                    break;
+            }
+        }
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        if (animator == null || !animator.isHuman)
+            return;
+
+        float weight = IsMounted ? 1f : 0f;
+        ApplyGoal(AvatarIKGoal.LeftHand, leftHandTarget, weight);
+        ApplyGoal(AvatarIKGoal.RightHand, rightHandTarget, weight);
+        ApplyGoal(AvatarIKGoal.LeftFoot, leftFootTarget, weight);
+        ApplyGoal(AvatarIKGoal.RightFoot, rightFootTarget, weight);
+        ApplyHint(AvatarIKHint.LeftElbow, leftElbowHint, weight);
+        ApplyHint(AvatarIKHint.RightElbow, rightElbowHint, weight);
+        ApplyHint(AvatarIKHint.LeftKnee, leftKneeHint, weight);
+        ApplyHint(AvatarIKHint.RightKnee, rightKneeHint, weight);
+    }
+
+    private void ApplyGoal(AvatarIKGoal goal, Transform target, float weight)
+    {
+        float appliedWeight = target != null ? weight : 0f;
+        animator.SetIKPositionWeight(goal, appliedWeight);
+        animator.SetIKRotationWeight(goal, appliedWeight);
+        if (appliedWeight <= 0f)
+            return;
+
+        animator.SetIKPosition(goal, target.position);
+        animator.SetIKRotation(goal, target.rotation);
+    }
+
+    private void ApplyHint(AvatarIKHint hintGoal, Transform hint, float weight)
+    {
+        float appliedWeight = hint != null ? weight : 0f;
+        animator.SetIKHintPositionWeight(hintGoal, appliedWeight);
+        if (appliedWeight > 0f)
+            animator.SetIKHintPosition(hintGoal, hint.position);
     }
 
     private bool ConnectArmHint(string constraintObjectName, string hintObjectName)

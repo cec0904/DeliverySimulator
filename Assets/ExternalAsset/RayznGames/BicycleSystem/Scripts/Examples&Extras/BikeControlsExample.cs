@@ -25,8 +25,9 @@ namespace rayzngames
 
             if (controllingBike)
             {
-                //Constrains the Z rotation of the bike, when onground, and releases it when airborne.
-                bicycle.ConstrainRotation(bicycle.OnGround());
+                // Keep the mounted bike stable even when the ground contact
+                // briefly flickers while crossing seams or uneven surfaces.
+                bicycle.ConstrainRotation(true);
             }
             else
             {

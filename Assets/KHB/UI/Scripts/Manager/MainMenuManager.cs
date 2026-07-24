@@ -14,6 +14,7 @@ public class MainMenuManager : MonoBehaviour
 
     public void SetMenuVisible(bool visible)
     {
+        
         gameObject.SetActive(visible);
 
         ResetToMainButtons();

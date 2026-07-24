@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-
-
 public class QuestGenerator : MonoBehaviour
 {
     [Header("[ 퀘스트 데이터베이스 연결 ]")]

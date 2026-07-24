@@ -9,7 +9,7 @@ public class QuestManager : MonoBehaviour
     public QuestGenerator questGenerator;
     public QuestOfferUI offerUI;
 
-    public float offerInterval = 100.0f;
+    public float offerInterval = 10.0f;
 
     //gameover count?
     public int maxActiveQuestCount = 5;
@@ -71,6 +71,10 @@ public class QuestManager : MonoBehaviour
                     if (QuestManager.Instance != null)
                     {
                         QuestManager.Instance.GetActiveQuests().Add(runtimeQuest);
+                        if (QuestListUI.Instance != null && QuestListUI.Instance.gameObject.activeInHierarchy)
+                        {
+                            QuestListUI.Instance.RefreshQuestList();
+                        }
                     }
                     Debug.Log($"[수락 완료] {runtimeQuest.questTitle} 퀘스트가 목록에 추가되었습니다.");
                 }

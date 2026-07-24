@@ -206,13 +206,13 @@ namespace rayzngames
 		/// <param name="state"> Enables disables the Z rotation constraint </param>
 		public void ConstrainRotation(bool state)
 		{
-			if (state == true)
+			if (state)
 			{
-				rb.constraints = RigidbodyConstraints.FreezeRotationZ;
+				rb.constraints |= RigidbodyConstraints.FreezeRotationZ;
 			}
 			else
 			{
-				rb.constraints = RigidbodyConstraints.None;
+				rb.constraints &= ~RigidbodyConstraints.FreezeRotationZ;
 			}
 		}
 		/// <summary>

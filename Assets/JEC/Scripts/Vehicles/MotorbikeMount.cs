@@ -103,6 +103,12 @@ public sealed class MotorbikeMount : Interactable
         }
 
         promptMessage = "오토바이에 탑승하려면 F를 누르세요.";
+    }
+
+    private void Start()
+    {
+        // BicycleVehicle assigns its Rigidbody in Awake. Defer control setup until
+        // every component on the bike has completed Awake.
         SetBikeControl(false);
     }
 
@@ -119,24 +125,6 @@ public sealed class MotorbikeMount : Interactable
         {
             Dismount();
         }
-    }
-
-    private void FixedUpdate()
-    {
-        if (rider == null || bikeRigidbody == null)
-        {
-            return;
-        }
-
-        // Keep steering around Y, but stop the scooter from pitching or rolling over.
-        RigidbodyConstraints mountedConstraints = bikeConstraintsBeforeMount | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        mountedConstraints &= ~RigidbodyConstraints.FreezeRotationY;
-        bikeRigidbody.constraints = mountedConstraints;
-
-        Vector3 angularVelocity = bikeRigidbody.angularVelocity;
-        angularVelocity.x = 0f;
-        angularVelocity.z = 0f;
-        bikeRigidbody.angularVelocity = angularVelocity;
     }
 
     public override void Interact(GameObject interactor)
@@ -417,11 +405,18 @@ public sealed class MotorbikeMount : Interactable
         bicycle.horizontalInput = 0f;
         bicycle.verticalInput = 0f;
         bicycle.braking = !active;
+
         bicycle.InControl(active);
 
         if (!active)
         {
             bicycle.ConstrainRotation(true);
+        }
+
+        // BicycleVehicle이 Constraints를 변경한 뒤 다시 강제로 적용
+        if (bikeRigidbody != null)
+        {
+            bikeRigidbody.constraints = RigidbodyConstraints.FreezeRotationZ;
         }
     }
 

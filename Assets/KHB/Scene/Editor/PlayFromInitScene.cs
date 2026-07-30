@@ -37,7 +37,7 @@ public class ResetPlayModeScene
     {
         // 강제로 시작 씬 설정을 해제하여 현재 열린 씬에서 시작하도록 만듭니다.
         EditorSceneManager.playModeStartScene = null;
-        UnityEngine.Debug.Log("시작 씬 고정이 해제되었습니다. 이제 현재 씬에서 실행됩니다.");
+        //UnityEngine.Debug.Log("시작 씬 고정이 해제되었습니다. 이제 현재 씬에서 실행됩니다.");
     }
 }
 #endif

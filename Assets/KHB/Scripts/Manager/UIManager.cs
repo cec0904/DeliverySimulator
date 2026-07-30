@@ -1,5 +1,6 @@
+using System.Diagnostics;
 using UnityEngine;
-
+using Debug = UnityEngine.Debug;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
@@ -137,11 +138,22 @@ public class UIManager : MonoBehaviour
         UpdateGameState();
     }
 
+    public void CloseMainMenu()
+    {
+        if (mainMenuManager != null)
+        {
+            mainMenuManager.SetMenuVisible(false); // 내부에서 ResetToMainButtons()도 함께 수행됨
+        }
+
+        // 시간, 마우스 커서, 미니맵 등 재계산
+        UpdateGameState();
+    }
+
     private void UpdateGameState()
     {
         bool isMainMenuOpen = mainMenuManager != null && mainMenuManager.IsOpen;
         bool isAnyUIOpen = IsAnyPopupOpen() || isMainMenuOpen;
-
+        //Debug.Log($"[UpdateGameState] isMainMenuOpen: {isMainMenuOpen} | IsAnyPopupOpen(): {IsAnyPopupOpen()} => isAnyUIOpen: {isAnyUIOpen}");
         // UI 열려 있으면 마우스 가능, 시간 제어
         Cursor.visible = isAnyUIOpen;
         Cursor.lockState = isAnyUIOpen ? CursorLockMode.None : CursorLockMode.Locked;
@@ -160,5 +172,20 @@ public class UIManager : MonoBehaviour
     private void OnDestroy()
     {
         Time.timeScale = 1f;
+    }
+
+    public void OpenQuestPanel()
+    {
+        // 1. 메인 메뉴를 포함한 기존 모든 팝업 닫기
+        CloseAllPanels();
+
+        // 2. 퀘스트 패널 활성화
+        if (questPanel != null)
+        {
+            questPanel.SetActive(true);
+        }
+
+        // 3. UI 상태(시간, 커서, 미니맵 등) 동기화
+        UpdateGameState();
     }
 }

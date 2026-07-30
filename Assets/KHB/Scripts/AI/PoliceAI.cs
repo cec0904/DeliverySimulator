@@ -1,49 +1,63 @@
 using UnityEngine;
 using UnityEngine.AI;
+using rayzngames;
 
 public enum PoliceState { Patrol, Chase }
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class PoliceAI : MonoBehaviour
 {
-    public PoliceState currentState = PoliceState.Patrol;
-
-    [Header("추격 대상")]
-    public Transform target;
-
     private NavMeshAgent agent;
+    private Transform targetToChase;
+    private bool isChasing = false;
 
-    void Awake()
+    [Header("도보 추격 설정")]
+    public float runSpeed = 6.0f;
+    [SerializeField] private float arrestDistance = 1.5f;
+
+    private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        agent.stoppingDistance = arrestDistance;
     }
 
-    void Update()
+    /// <summary>
+    /// 차량 AI로부터 호출되어 도보 추격을 시작합니다.
+    /// </summary>
+    public void StartFootChase(Transform target)
     {
-        switch (currentState)
-        {
-            case PoliceState.Patrol:
-                // 기본 순찰 로직 (생략 가능)
-                break;
+        if (target == null) return;
+        targetToChase = target;
+        isChasing = true;
 
-            case PoliceState.Chase:
-                // 타겟(속도 위반한 자전거)을 실시간 추격
-                if (target != null)
-                {
-                    agent.SetDestination(target.position);
-                }
-                break;
+        agent.speed = runSpeed;
+        agent.isStopped = false;
+
+        // 애니메이터가 있다면 달리기 애니메이션 트리거 설정
+        // Animator anim = GetComponentInChildren<Animator>();
+        // anim.SetBool("isRunning", true);
+    }
+
+    private void Update()
+    {
+        if (isChasing && targetToChase != null)
+        {
+            // 플레이어의 실시간 위치로 내비게이션 목적지 갱신
+            agent.SetDestination(targetToChase.transform.position);
+
+            // 체포 거리 도달 시 로직
+            if (agent.remainingDistance <= agent.stoppingDistance && !agent.pathPending)
+            {
+                ArrestPlayer();
+            }
         }
     }
 
-    // 감지 구역에서 속도 위반 감지 시 호출되는 메서드
-    public void StartChase(Transform targetTransform)
+    private void ArrestPlayer()
     {
-        if (currentState != PoliceState.Chase)
-        {
-            target = targetTransform;
-            currentState = PoliceState.Chase;
-            Debug.Log("경찰: 속도 위반 차량 추격을 시작합니다!");
-        }
+        isChasing = false;
+        agent.isStopped = true;
+        Debug.Log("<color=blue>[경찰관 AI]</color> 플레이어 체포 완료!");
+
     }
 }

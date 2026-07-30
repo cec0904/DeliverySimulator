@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6192657465802358454}
   - component: {fileID: 5527835270636670242}
   - component: {fileID: 223633762498563836}
-  m_Layer: 8
+  m_Layer: 10
   m_Name: HorizontalLine
   m_TagString: StopLine
   m_Icon: {fileID: 0}
@@ -48,7 +48,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -67,4 +67,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StopLine
   targetTrafficLight: {fileID: 0}
-  isSideA: 1
+  isSideA: 0

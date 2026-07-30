@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - StopLine
+  - Car
+  - MapCamera
   layers:
   - Default
   - TransparentFX
@@ -14,8 +17,8 @@ TagManager:
   - Road
   - Obstacle
   - CrossWalk
-  - 
-  - 
+  - TrafficControll
+  - StopLine
   - 
   - 
   - 

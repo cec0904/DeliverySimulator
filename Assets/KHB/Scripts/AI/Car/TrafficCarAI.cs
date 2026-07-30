@@ -5,7 +5,7 @@ public class TrafficCarAI : MonoBehaviour
     public enum CarState { Move, Stop }
 
     [Header("차량 설정")]
-    [SerializeField] private float moveSpeed = 10f;
+    [SerializeField] private float moveSpeed = 4f;
     [SerializeField] private float stopDistance = 3f; // 정지선/앞차와의 안전거리
     [SerializeField] private float sensorDistance = 15f; // 감지 레이캐스트 거리
 
@@ -25,6 +25,7 @@ public class TrafficCarAI : MonoBehaviour
 
     private void CheckForwardSensor()
     {
+        Debug.Log(" raycast 감지");
 
         RaycastHit hit;
         Vector3 rayStart = transform.position + Vector3.up * 0.5f;
@@ -87,10 +88,10 @@ public class TrafficCarAI : MonoBehaviour
         }
     }
 
-    //private void OnDrawGizmosSelected()
-    //{
-    //    // 에디터 뷰에서 센서 레이캐스트 시각화
-    //    Gizmos.color = Color.red;
-    //    Gizmos.DrawRay(transform.position + Vector3.up * 0.5f, transform.forward * sensorDistance);
-    //}
+    private void OnDrawGizmosSelected()
+    {
+        // 에디터 뷰에서 센서 레이캐스트 시각화
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(transform.position + Vector3.up * 0.5f, transform.forward * sensorDistance);
+    }
 }

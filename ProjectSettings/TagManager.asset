@@ -5,7 +5,10 @@ TagManager:
   serializedVersion: 3
   tags:
   - StopLine
+<<<<<<< Updated upstream
   - Car
+=======
+>>>>>>> Stashed changes
   - MapCamera
   layers:
   - Default
@@ -17,8 +20,13 @@ TagManager:
   - Road
   - Obstacle
   - CrossWalk
+<<<<<<< Updated upstream
   - TrafficControll
   - StopLine
+=======
+  - NPCEntrance
+  - 
+>>>>>>> Stashed changes
   - 
   - 
   - 

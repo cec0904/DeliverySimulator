@@ -5,7 +5,8 @@ using System.Collections;
 public enum CitizenState
 {
     MovingToPOI,
-    WaitingAtPOI
+    WaitingAtPOI,
+    MovingToEntrance
 }
 
 public enum AvoidDirection
@@ -31,7 +32,7 @@ public enum CitizenMoveType
 public class CitizenAI : MonoBehaviour
 {
     [Header("POI")]
-    [SerializeField] private Transform[] poiPoints;
+    private Transform[] poiPoints;
     [SerializeField] private float minWaitTime = 2f;
     [SerializeField] private float maxWaitTime = 5f;
     [SerializeField] private float arrivalTolerance = 0.15f;
@@ -60,6 +61,9 @@ public class CitizenAI : MonoBehaviour
     private bool isAvoiding;
     private Coroutine avoidCoroutine;
 
+    [SerializeField] private float avoidRetriggerCooldown = 2f;
+    private float nextAvoidAllowedTime;
+
 
     [Header("Movement")]
     [SerializeField] private float basicWalkSpeed = 1.8f;
@@ -76,7 +80,10 @@ public class CitizenAI : MonoBehaviour
     [SerializeField] private float departureGraceTime = 0.2f;
     private float moveStartTime;
 
+    [Header("Pool")]
+    [SerializeField, Range(0f, 1f)] private float returnToEntranceChance = 0.2f;
 
+    private CitizenPoolManager poolManager;
 
 
     private void Awake()
@@ -140,6 +147,10 @@ public class CitizenAI : MonoBehaviour
             case CitizenState.WaitingAtPOI:
                 UpdateWaiting();
                 break;
+
+            case CitizenState.MovingToEntrance:
+                UpdateMovingToEntrance();
+                break;
         }
     }
 
@@ -162,9 +173,8 @@ public class CitizenAI : MonoBehaviour
 
         bool reachedDestination = agent.remainingDistance <= agent.stoppingDistance + arrivalTolerance;
 
-        bool almostStopped = !agent.hasPath || agent.velocity.sqrMagnitude <= 0.01f;
 
-        if (reachedDestination && almostStopped)
+        if (reachedDestination)
         {
             StartWaiting();
         }
@@ -172,21 +182,41 @@ public class CitizenAI : MonoBehaviour
 
     private void UpdateWaiting()
     {
-        if (Time.time >= waitEndTime)
+        if (Time.time < waitEndTime)
         {
-            MoveToNextPOI();
+            return;
         }
+
+        if (poolManager != null && Random.value < returnToEntranceChance)
+        {
+            MoveToEntrance();
+            return;
+        }
+
+        MoveToNextPOI();
     }
 
     private bool TryGetNextValidPOI(out Transform target)
     {
         target = null;
 
-        for (int i = 0; i < poiPoints.Length; i++)
+        if (poiPoints == null || poiPoints.Length == 0)
         {
-            currentPoiIndex = (currentPoiIndex + 1) % poiPoints.Length;
+            return false;
+        }
 
-            Transform candidate = poiPoints[currentPoiIndex];
+        int attemptCount = poiPoints.Length * 2;
+
+        for (int i = 0; i < attemptCount; i++)
+        {
+            int randomPoiIndex = Random.Range(0, poiPoints.Length);
+
+            if (poiPoints.Length > 1 && randomPoiIndex == currentPoiIndex)
+            {
+                continue;
+            }
+
+            Transform candidate = poiPoints[randomPoiIndex];
 
             if (candidate == null)
             {
@@ -201,7 +231,9 @@ public class CitizenAI : MonoBehaviour
                 continue;
             }
 
+            currentPoiIndex = randomPoiIndex;
             target = candidate;
+
             return true;
         }
 
@@ -285,12 +317,13 @@ public class CitizenAI : MonoBehaviour
 
     private IEnumerator PlayAvoid(AvoidDirection direction)
     {
-        isAvoiding = true;
 
         // 방향을 먼저 설정한 후 IsAvoiding을 켜야 한다.
         animator.SetInteger(AvoidDirectionHash, (int)direction);
 
         animator.SetBool(IsAvoidingHash, true);
+
+        animator.SetBool(IsMovingHash, false);
 
         // 회피 애니메이션 중에는 NavMeshAgent 이동 정지
         if (agent.isOnNavMesh)
@@ -302,23 +335,20 @@ public class CitizenAI : MonoBehaviour
         yield return new WaitForSeconds(avoidDuration);
 
         animator.SetBool(IsAvoidingHash, false);
-        isAvoiding = false;
 
         bool shouldMove = currentState == CitizenState.MovingToPOI;
 
         animator.SetBool(IsMovingHash, shouldMove);
 
-        if (agent.isOnNavMesh)
-        {
-            agent.isStopped = !shouldMove;
-        }
+        if (agent.isOnNavMesh) agent.isStopped = !shouldMove;
 
         avoidCoroutine = null;
+        isAvoiding = false;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (animator == null || isAvoiding)
+        if (animator == null || isAvoiding || Time.time < nextAvoidAllowedTime)
         {
             return;
         }
@@ -346,6 +376,8 @@ public class CitizenAI : MonoBehaviour
 
         AvoidDirection direction = CalculateAvoidDirection(localContactPoint);
 
+        isAvoiding = true;
+        nextAvoidAllowedTime = Time.time + avoidDuration + avoidRetriggerCooldown;
         avoidCoroutine = StartCoroutine(PlayAvoid(direction));
     }
 
@@ -380,4 +412,98 @@ public class CitizenAI : MonoBehaviour
         }
     }
 
+
+
+    public void InitializePool(CitizenPoolManager manager, Transform[] sharedPoiPoints)
+    {
+        poolManager = manager;
+        poiPoints = sharedPoiPoints;
+    }
+
+    private void MoveToEntrance()
+    {
+        if (poolManager == null)
+        {
+            MoveToNextPOI();
+            return;
+        }
+
+        if (!poolManager.TryGetRandomEntrancePosition(out Vector3 entrancePosition))
+        {
+            Debug.LogWarning($"{name}: 이동할 Entrance Point를 찾지 못했습니다.", this);
+            MoveToNextPOI();
+            return;
+        }
+
+        agent.isStopped = false;
+
+        if (!agent.SetDestination(entrancePosition))
+        {
+            Debug.LogWarning($"{name}: Entrance Point로 가는 경로 설정에 실패했습니다.", this);
+            MoveToNextPOI();
+            return;
+        }
+
+        currentState = CitizenState.MovingToEntrance;
+        moveStartTime = Time.time;
+
+        animator.SetBool(IsMovingHash, true);
+    }
+
+    private void UpdateMovingToEntrance()
+    {
+        if (Time.time - moveStartTime < departureGraceTime)
+        {
+            return;
+        }
+
+        if (agent.pathPending)
+        {
+            return;
+        }
+
+        if (float.IsInfinity(agent.remainingDistance))
+        {
+            return;
+        }
+
+        bool reachedEntrance = agent.remainingDistance <= agent.stoppingDistance + arrivalTolerance;
+
+        if (!reachedEntrance)
+        {
+            return;
+        }
+
+        if (poolManager == null)
+        {
+            StartWaiting();
+            return;
+        }
+
+        poolManager.RecycleCitizen(this);
+    }
+
+    public void SpawnFromEntrance(Vector3 spawnPosition)
+    {
+        avoidCoroutine = null;
+        isAvoiding = false;
+        nextAvoidAllowedTime = 0f;
+        currentPoiIndex = -1;
+        waitEndTime = 0f;
+
+        if (!agent.Warp(spawnPosition))
+        {
+            Debug.LogError($"{name}: Entrance Point로 Warp하지 못했습니다.", this);
+            return;
+        }
+
+        agent.isStopped = false;
+        agent.ResetPath();
+
+        animator.SetBool(IsAvoidingHash, false);
+        animator.SetBool(IsMovingHash, false);
+
+        SelectRandomMoveType();
+        MoveToNextPOI();
+    }
 }

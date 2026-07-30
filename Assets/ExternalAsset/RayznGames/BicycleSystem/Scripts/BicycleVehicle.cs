@@ -146,7 +146,9 @@ namespace rayzngames
 		/// </summary>
 		[Header("Speed M/s")]
 		public float currentSpeed { get; private set; }
-		protected private WheelHit frontInfo;
+        public float currentSpeedKmh => currentSpeed * 3.6f;
+
+        protected private WheelHit frontInfo;
 		protected private WheelHit rearInfo;
 		
 		void Awake()

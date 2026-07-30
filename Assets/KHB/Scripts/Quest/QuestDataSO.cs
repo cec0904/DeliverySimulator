@@ -34,6 +34,10 @@ public class QuestDataSO : ScriptableObject
     public DeliveryType deliveryType;     
     public string deliveryItemName;
 
+    [Header("[ NPC 세부 정보 ]")]
+    [Tooltip("아이템을 전달받을 NPC의 고유 ID")]
+    public string targetNpcID;
+
     [HideInInspector] public int timeLimit;
     [HideInInspector] public int rewardGold;
 

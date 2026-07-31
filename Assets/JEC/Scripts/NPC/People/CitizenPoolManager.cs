@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class CitizenPoolManager : MonoBehaviour
 {
     [Header("Citizen")]
-    [SerializeField] private CitizenAI citizenPrefab;
+    [SerializeField] private CitizenAI[] citizenPrefab;
     [SerializeField] private int citizenCount = 100;
 
     [Header("Points")]
@@ -27,7 +28,7 @@ public class CitizenPoolManager : MonoBehaviour
 
     private bool ValidateSettings()
     {
-        if (citizenPrefab == null)
+        if (citizenPrefab == null || citizenPrefab.Length == 0)
         {
             Debug.LogError($"{name}: Citizen Prefab이 지정되지 않았습니다.", this);
             return false;
@@ -64,9 +65,22 @@ public class CitizenPoolManager : MonoBehaviour
                 return;
             }
 
-            CitizenAI citizen = Instantiate(citizenPrefab, spawnPosition, Quaternion.identity, transform);
+            //CitizenAI citizen = Instantiate(citizenPrefab, spawnPosition, Quaternion.identity, transform);
+            //citizen.InitializePool(this, poiPoints);
+            //citizen.name = $"Citizen_{i + 1}";
+
+            CitizenAI selectedPrefab = citizenPrefab[Random.Range(0, citizenPrefab.Length)];
+
+            if(selectedPrefab == null)
+            {
+                Debug.LogError($"{name}: Citizen Prefab 이 비어있습니다.", this);
+                return;
+            }
+
+            CitizenAI citizen = Instantiate(selectedPrefab, spawnPosition, selectedPrefab.transform.rotation, transform);
             citizen.InitializePool(this, poiPoints);
-            citizen.name = $"Citizen_{i + 1}";
+            citizen.name = $"{selectedPrefab.name}_{i + 1}";
+            citizen.gameObject.SetActive(true);
         }
     }
 

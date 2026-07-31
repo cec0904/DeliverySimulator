@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6192657465802358454}
   - component: {fileID: 5527835270636670242}
   - component: {fileID: 223633762498563836}
-  m_Layer: 10
+  m_Layer: 20
   m_Name: HorizontalLine
   m_TagString: StopLine
   m_Icon: {fileID: 0}

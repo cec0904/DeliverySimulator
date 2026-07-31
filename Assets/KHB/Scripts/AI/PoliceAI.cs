@@ -8,7 +8,8 @@ public enum PoliceState { Patrol, Chase }
 public class PoliceAI : MonoBehaviour
 {
     private NavMeshAgent agent;
-    private Transform targetToChase;
+    [Header("추격 대상 설정")]
+    [SerializeField] private Transform targetToChase;
     private bool isChasing = false;
 
     [Header("도보 추격 설정")]
@@ -24,18 +25,17 @@ public class PoliceAI : MonoBehaviour
     /// <summary>
     /// 차량 AI로부터 호출되어 도보 추격을 시작합니다.
     /// </summary>
-    public void StartFootChase(Transform target)
+    public void StartFootChase()
     {
-        if (target == null) return;
-        targetToChase = target;
-        isChasing = true;
+        if (targetToChase == null)
+        {
+            Debug.LogWarning("[PoliceOfficerAI] 추격할 Target이 에디터에 할당되지 않았습니다!");
+            return;
+        }
 
+        isChasing = true;
         agent.speed = runSpeed;
         agent.isStopped = false;
-
-        // 애니메이터가 있다면 달리기 애니메이션 트리거 설정
-        // Animator anim = GetComponentInChildren<Animator>();
-        // anim.SetBool("isRunning", true);
     }
 
     private void Update()

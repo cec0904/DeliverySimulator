@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3242315973162c42adc652e936d94ff, type: 3}
+  m_Name: Quest_BlueberryBagel
+  m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
+  questId: 2
+  displayName: 
+  description: 
+  icon: {fileID: 2800000, guid: 05a40ecbbd9b9164e92716991ba3112d, type: 3}
+  baseReward: 0

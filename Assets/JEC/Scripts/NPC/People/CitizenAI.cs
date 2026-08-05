@@ -28,6 +28,13 @@ public enum CitizenMoveType
     Jogging = 4
 }
 
+public enum CitizenAgeType
+{
+    Adult = 0,
+    Child = 1,
+    Elder = 2
+}
+
 [RequireComponent(typeof(NavMeshAgent))]
 public class CitizenAI : MonoBehaviour
 {
@@ -40,10 +47,13 @@ public class CitizenAI : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private Animator animator;
     [SerializeField] private bool isMale;
+    [SerializeField] private CitizenAgeType ageType;
+
 
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
 
     private static readonly int IsMaleHash = Animator.StringToHash("IsMale");
+    private static readonly int AgeTypeHash = Animator.StringToHash("AgeType");
 
     private NavMeshAgent agent;
     private CitizenState currentState;
@@ -103,6 +113,9 @@ public class CitizenAI : MonoBehaviour
         }
 
         animator.SetBool(IsMaleHash, isMale);
+        animator.SetInteger(AgeTypeHash, (int)ageType);
+
+
         animator.SetBool(IsMovingHash, false);
         animator.SetBool(IsAvoidingHash, false);
     }
@@ -126,6 +139,7 @@ public class CitizenAI : MonoBehaviour
 
 
         animator.SetBool(IsMaleHash, isMale);
+        animator.SetInteger(AgeTypeHash, (int)ageType);
 
         SelectRandomMoveType();
         MoveToNextPOI();

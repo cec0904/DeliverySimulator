@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 3018265196656322874}
   - component: {fileID: 3311909757300589527}
   - component: {fileID: 2176541916761319899}
-  m_Layer: 9
+  m_Layer: 20
   m_Name: TestCar
   m_TagString: Car
   m_Icon: {fileID: 0}
@@ -132,7 +132,7 @@ MonoBehaviour:
   sensorDistance: 15
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 1048576
 --- !u!114 &3311909757300589527
 MonoBehaviour:
   m_ObjectHideFlags: 0

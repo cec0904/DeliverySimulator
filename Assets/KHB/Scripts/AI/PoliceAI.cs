@@ -16,7 +16,9 @@ public class PoliceAI : MonoBehaviour
 
     [Header("도보 추격 설정")]
     public float runSpeed = 6.0f;
+    private bool isTargetOnNavMesh = true;
     [SerializeField] private float arrestDistance = 1.5f;
+    
 
     [Header("추격 포기 설정")]
     [SerializeField] private float maxChaseTime = 10.0f;
@@ -61,7 +63,7 @@ public class PoliceAI : MonoBehaviour
 
         if (!isChasing || targetToChase == null) return;
 
-
+        // 1. 10초 추격 제한 타이머
         currentChaseTimer += Time.deltaTime;
         if (currentChaseTimer >= maxChaseTime)
         {
@@ -69,30 +71,33 @@ public class PoliceAI : MonoBehaviour
             return;
         }
 
-        if (Vector3.Distance(transform.position, targetToChase.position) <= arrestDistance)
+        if ((transform.position - targetToChase.position).sqrMagnitude <= arrestDistance * arrestDistance)
         {
             ArrestPlayer();
             return;
         }
 
-        // 1. 플레이어가 내비메시(도로) 위에 있는지 확인
-        bool isOnNavMesh = NavMesh.SamplePosition(targetToChase.position, out NavMeshHit hit, 2.0f, NavMesh.AllAreas);
-
-        if (isOnNavMesh)
+        pathUpdateTimer += Time.deltaTime;
+        if (pathUpdateTimer >= pathUpdateInterval)
         {
-            if (!agent.enabled) agent.enabled = true;
+            pathUpdateTimer = 0f;
 
-            pathUpdateTimer += Time.deltaTime;
-            if (pathUpdateTimer >= pathUpdateInterval)
+            isTargetOnNavMesh = NavMesh.SamplePosition(targetToChase.position, out NavMeshHit hit, 2.0f, NavMesh.AllAreas);
+
+            if (isTargetOnNavMesh)
             {
-                pathUpdateTimer = 0f;
+                if (!agent.enabled) agent.enabled = true;
                 agent.SetDestination(targetToChase.position);
             }
+            else
+            {
+                if (agent.enabled) agent.enabled = false;
+            }
         }
-        else
-        {
-            if (agent.enabled) agent.enabled = false;
 
+        // 3. 오프로드 직접 이동 처리 (이동 자체는 부드럽게 매 프레임 처리되어야 함)
+        if (!isTargetOnNavMesh)
+        {
             Vector3 direction = (targetToChase.position - transform.position);
             direction.y = 0;
 
@@ -117,6 +122,10 @@ public class PoliceAI : MonoBehaviour
         {
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
+            if (animator != null)
+            {
+                animator.SetFloat("Speed", 0f);
+            }
         }
         Debug.Log("<color=blue>[경찰관 AI]</color> 플레이어 체포 완료!");
     }

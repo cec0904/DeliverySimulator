@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4971607319322692}
   - component: {fileID: 2476099042847750038}
-  m_Layer: 0
+  m_Layer: 20
   m_Name: Traffic light 2 Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46,6 +46,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrafficLight
   lightRenderer: {fileID: 23200965449310994}
+  sideA_RedIndex: 1
+  sideA_YellowIndex: 2
+  sideA_GreenIndex: 3
+  sideB_RedIndex: 4
+  sideB_YellowIndex: 5
+  sideB_GreenIndex: 6
   greenOnMat: {fileID: 2100000, guid: 510f1a4c405d15b44836b4cd601a8d6c, type: 2}
   yellowOnMat: {fileID: 2100000, guid: 2495a7e75efcd184eba75fee16e04d42, type: 2}
   redOnMat: {fileID: 2100000, guid: 25cba0c6a3b08d5468d1a6db26100cee, type: 2}
@@ -64,7 +70,7 @@ GameObject:
   - component: {fileID: 33383848941650494}
   - component: {fileID: 23200965449310994}
   - component: {fileID: 64631858001257746}
-  m_Layer: 0
+  m_Layer: 20
   m_Name: Traffic_light_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

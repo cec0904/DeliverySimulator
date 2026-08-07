@@ -130,4 +130,4 @@ MonoBehaviour:
   sensorDistance: 15
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 512

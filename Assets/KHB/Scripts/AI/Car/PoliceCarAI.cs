@@ -21,6 +21,12 @@ public class PoliceCarAI : MonoBehaviour
     [Tooltip("선점한 목적지 도달 판정 거리")]
     [SerializeField] private float arrivalDistance = 3.0f;
 
+    [Header("바퀴 회전 설정")]
+    [SerializeField] private Transform[] wheels; // 경찰차 바퀴 Transform 4개
+    [SerializeField] private float wheelRotateSpeed = 200f; // 바퀴 회전 속도 배율
+    [SerializeField] private Vector3 wheelAxis = Vector3.right; // 회전 축 (기본: X축)
+
+
     [Header("🔥 스마트 추격 보정 (Failsafe)")]
     [Tooltip("플레이어가 예측 지점에서 이 거리 이상 벗어나면 예측을 재계산합니다.")]
     [SerializeField] private float repredictTolerance = 15.0f;
@@ -75,6 +81,7 @@ public class PoliceCarAI : MonoBehaviour
                 CheckIfPathBlocked();
                 DriveNaturally();
                 CheckIfArrivedAtDestination();
+                RotateWheels();
                 break;
 
             case PoliceState.Blocking:
@@ -246,6 +253,25 @@ public class PoliceCarAI : MonoBehaviour
         }
     }
 
+    private void RotateWheels()
+    {
+        if (wheels == null || wheels.Length == 0) return;
+
+        float currentSpeed = agent.velocity.magnitude;
+
+        if (currentSpeed > 0.1f)
+        {
+            float rotationAmount = currentSpeed * wheelRotateSpeed * Time.deltaTime;
+
+            for (int i = 0; i < wheels.Length; i++)
+            {
+                if (wheels[i] != null)
+                {
+                    wheels[i].Rotate(wheelAxis * rotationAmount, Space.Self);
+                }
+            }
+        }
+    }
     private void CheckIfArrivedAtDestination()
     {
         if (!hasLockedDestination || isDeploying) return;

@@ -91,7 +91,7 @@ public class TrafficObjectPool : MonoBehaviour
     public void ReturnCar(GameObject car, int prefabIndex)
     {
         car.SetActive(false);
-        car.transform.SetParent(transform);
+        car.transform.SetParent(transform, false);
 
         if (poolDictionary.ContainsKey(prefabIndex))
         {

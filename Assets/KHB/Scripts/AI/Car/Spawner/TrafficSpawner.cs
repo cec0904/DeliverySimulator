@@ -1,34 +1,63 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 public class TrafficSpawner : MonoBehaviour
 {
-    public Transform[] spawnPoints;
-    public float spawnInterval = 3f;
-
-    private float timer;
-
-    private void Update()
+    [System.Serializable]
+    public class SpawnPointData
     {
-        timer += Time.deltaTime;
-        if (timer >= spawnInterval)
+        public Transform point;
+        [HideInInspector] public float timer;
+        [HideInInspector] public float currentInterval;
+    }
+
+    [Header("Spawn Points")]
+    public List<SpawnPointData> spawnPointDatas = new List<SpawnPointData>();
+
+    [Header("Spawn Interval Settings")]
+    [SerializeField] private float minSpawnInterval = 6f;  // 최소 대기 시간
+    [SerializeField] private float maxSpawnInterval = 12f; // 최대 대기 시간
+
+    private void Start()
+    {
+        foreach (var spData in spawnPointDatas)
         {
-            SpawnVehicle();
-            timer = 0f;
+            SetRandomInterval(spData);
+            spData.timer = Random.Range(0f, spData.currentInterval);
         }
     }
 
-    private void SpawnVehicle()
+    private void Update()
     {
-        if (spawnPoints.Length == 0) return;
+        foreach (var spData in spawnPointDatas)
+        {
+            if (spData.point == null) continue;
 
-        // 랜덤 위치 및 랜덤 차량 종류 선택
-        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];
+            spData.timer += Time.deltaTime;
+            if (spData.timer >= spData.currentInterval)
+            {
+                SpawnVehicleAt(spData.point);
+                spData.timer = 0f;
+                SetRandomInterval(spData);
+            }
+        }
+    }
+
+    private void SetRandomInterval(SpawnPointData spData)
+    {
+        spData.currentInterval = Random.Range(minSpawnInterval, maxSpawnInterval);
+    }
+
+    private void SpawnVehicleAt(Transform spawnPoint)
+    {
+        if (TrafficObjectPool.Instance == null) return;
+
         int totalCarTypes = TrafficObjectPool.Instance.CarPrefabCount;
         if (totalCarTypes == 0) return;
 
         int randomPrefabIndex = Random.Range(0, totalCarTypes);
 
-        // 풀에서 꺼내기
         TrafficObjectPool.Instance.GetCar(randomPrefabIndex, spawnPoint.position, spawnPoint.rotation);
     }
 }

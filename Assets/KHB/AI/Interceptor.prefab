@@ -447,13 +447,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoliceCarAI
   currentState: 2
+  currentApproach: 0
   targetPlayer: {fileID: 0}
   predictionTime: 3
   chaseSpeed: 25
   turnSpeed: 5
   arrivalDistance: 5
+  wheels:
+  - {fileID: 1523934674269573928}
+  - {fileID: 3157627150629413067}
+  - {fileID: 4138909063208313353}
+  - {fileID: 2554417114740055087}
+  wheelRotateSpeed: 200
+  wheelAxis: {x: 1, y: 0, z: 0}
+  repredictTolerance: 15
+  repredictCooldown: 1.5
+  sideOffsetDistance: 3.5
+  minSafeDistance: 8
   blockAngleOffset: 90
-  blockSlideDistance: 4
+  policeOfficerPrefab: {fileID: 0}
+  doorSpawnPoint: {fileID: 0}
+  maxDeployDistance: 10
+  deployWhenBlockedDistance: 25
 --- !u!1 &8473462438945118914
 GameObject:
   m_ObjectHideFlags: 0

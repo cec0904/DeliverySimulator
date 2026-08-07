@@ -25,21 +25,16 @@ public class TrafficCarAI : MonoBehaviour
 
     private void CheckForwardSensor()
     {
-        Debug.Log(" raycast 감지");
 
         RaycastHit hit;
-        Vector3 rayStart = transform.position + Vector3.up * 0.5f;
         // 차량 전방으로 Raycast 발사
         if (Physics.Raycast(transform.position + Vector3.up * 0.5f, transform.forward, out hit, sensorDistance, obstacleLayer))
         {
-            Debug.DrawLine(rayStart, hit.point, Color.red, 0.1f);
             // A. 전방에 '앞차'가 감지된 경우
             if (hit.collider.CompareTag("Car"))
             {
-                Debug.Log("차 감지");
                 if (hit.distance <= stopDistance)
                 {
-                    Debug.Log($" 남은 거리: {hit.distance:F2}m (목표: {stopDistance}m 이하)");
 
                     currentState = CarState.Stop;
                     return;
@@ -58,11 +53,9 @@ public class TrafficCarAI : MonoBehaviour
                     // 노란불이거나 빨간불이고, 정지선 근처에 도달했다면 정지
                     if (currentSignal == TrafficLight.LightColor.Red || currentSignal == TrafficLight.LightColor.Yellow)
                     {
-                        Debug.Log($"[정지선 감지] 신호: {currentSignal} | 남은 거리: {hit.distance:F2}m (목표: {stopDistance}m 이하)");
-
+                        
                         if (hit.distance <= stopDistance)
                         {
-                            Debug.Log("정지선에 멈춤");
 
                             currentState = CarState.Stop;
                             return;

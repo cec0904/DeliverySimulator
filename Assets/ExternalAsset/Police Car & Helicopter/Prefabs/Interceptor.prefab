@@ -360,14 +360,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoliceCarAI
   currentState: 0
+  currentApproach: 0
   targetPlayer: {fileID: 0}
-  predictionTime: 3
+  predictionTime: 1
   chaseSpeed: 25
   turnSpeed: 5
   arrivalDistance: 5
+  repredictTolerance: 15
+  repredictCooldown: 1.5
+  sideOffsetDistance: 3.5
+  minSafeDistance: 8
   blockAngleOffset: 90
   policeOfficerPrefab: {fileID: 3834739496409163153}
   doorSpawnPoint: {fileID: 8061939423927721961}
+  maxDeployDistance: 10
+  deployWhenBlockedDistance: 25
 --- !u!1 &126268
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,6 +569,7 @@ GameObject:
   - component: {fileID: 1264943534776097566}
   - component: {fileID: 5314913557698583077}
   - component: {fileID: 7228814622064344130}
+  - component: {fileID: 589065201424742817}
   m_Layer: 0
   m_Name: Police
   m_TagString: Untagged
@@ -696,7 +704,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bfa3b8989d5c65a4aa02c6b415793fa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PoliceAI
+  targetToChase: {fileID: 0}
   runSpeed: 6
+  arrestDistance: 1.5
+--- !u!95 &589065201424742817
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3834739496409163153}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &8368820494695629030
 GameObject:
   m_ObjectHideFlags: 0

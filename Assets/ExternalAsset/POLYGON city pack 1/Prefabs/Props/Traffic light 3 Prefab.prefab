@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4224860659773492}
+  - component: {fileID: 9022676234501356454}
   m_Layer: 0
   m_Name: Traffic light 3 Prefab
   m_TagString: Untagged
@@ -32,6 +33,31 @@ Transform:
   - {fileID: 4101018199865028}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9022676234501356454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084201590214968}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 226b08280f09d324ba94cc559c1cc55d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrafficLight
+  lightRenderer: {fileID: 0}
+  sideA_RedIndex: 1
+  sideA_YellowIndex: 2
+  sideA_GreenIndex: 3
+  sideB_RedIndex: 4
+  sideB_YellowIndex: 5
+  sideB_GreenIndex: 6
+  greenOnMat: {fileID: 2100000, guid: 510f1a4c405d15b44836b4cd601a8d6c, type: 2}
+  yellowOnMat: {fileID: 2100000, guid: 2495a7e75efcd184eba75fee16e04d42, type: 2}
+  redOnMat: {fileID: 2100000, guid: 25cba0c6a3b08d5468d1a6db26100cee, type: 2}
+  greenOffMat: {fileID: 2100000, guid: 749169b54d08d824e828e6b055ae52d9, type: 2}
+  yellowOffMat: {fileID: 2100000, guid: 7be5e417b52fd834280f56f025a91e5e, type: 2}
+  redOffMat: {fileID: 2100000, guid: 0414ceb8a1b2e2545b10709a55723d88, type: 2}
 --- !u!1 &1982014210697324
 GameObject:
   m_ObjectHideFlags: 0

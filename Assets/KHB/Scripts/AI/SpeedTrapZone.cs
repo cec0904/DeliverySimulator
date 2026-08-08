@@ -44,7 +44,7 @@ public class SpeedTrapZone : MonoBehaviour
 
                 if (dispatched)
                 {
-                    StartCoroutine(CooldownRoutine()); // 출동 성공 시 쿨타임 작동
+                    StartCoroutine(CooldownRoutine());
                 }
             }
         }

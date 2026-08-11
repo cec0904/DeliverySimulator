@@ -6,7 +6,7 @@ public class StartMenuManager : MonoBehaviour
     public void PlayGame()
     {
         Debug.Log("버튼이 클릭되었습니다! 씬 로드를 시도합니다.");
-        SceneManager.LoadScene("MainScene_v02KHB");
+        SceneManager.LoadScene("MainScene_v03");
     }
 
     // [게임 종료] 버튼 클릭 시 실행할 함수

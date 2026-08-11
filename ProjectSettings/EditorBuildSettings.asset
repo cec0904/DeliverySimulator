@@ -5,12 +5,12 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
     path: Assets/KHB/Scene/GameStartScene.unity
     guid: 175711772fe8eed4185d9c282722b70c
-  - enabled: 0
-    path: Assets/KHB/Scene/MainScene_v02KHB.unity
-    guid: d1e5201ba1fc7314cab35fb2a6ee78bd
+  - enabled: 1
+    path: Assets/JEC/Scenes/MainScene_v03/MainScene_v03.unity
+    guid: 5389e8f72448ffb4d8a265ce275161c8
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

@@ -17,15 +17,26 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject minimapPanel;
     [SerializeField] private Camera minimapCamera;
 
+    // 폰 애니메이션 연출 전용 컨트롤러
+    [SerializeField] private PhoneUIController phoneUIController;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
+    private void OnEnable()
+    {
+        if (phoneUIController != null)
+        {
+            phoneUIController.StateChanged += UpdateGameState;
+        }
+    }
+
     private void Start()
     {
-        // 🌟 게임 시작 시 UI 초기 상태 세팅
+        // 게임 시작 시 UI 초기 상태 세팅
         InitUI();
     }
 
@@ -35,7 +46,7 @@ public class UIManager : MonoBehaviour
 
         if (mainMenuManager != null) mainMenuManager.SetMenuVisible(false);
         if (mapPanel != null) mapPanel.SetActive(false);
-        if (questPanel != null) questPanel.SetActive(false);
+        //if (questPanel != null) questPanel.SetActive(false);
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
 
 
@@ -59,15 +70,20 @@ public class UIManager : MonoBehaviour
         {
             TogglePanel(mapPanel);
         }
+
         else if (Input.GetKeyDown(KeyManager.Instance.questKey))
         {
-            TogglePanel(questPanel);
+            if (phoneUIController != null)
+            {
+                phoneUIController.TogglePhone();
+                UpdateGameState();
+            }
         }
         //else if (Input.GetKeyDown(KeyManager.Instance.menuKey))
         //{
         //    TogglePanel(inventoryPanel);
         //}
-        
+
     }
 
     public void TogglePanel(GameObject targetPanel)
@@ -88,6 +104,27 @@ public class UIManager : MonoBehaviour
 
     private void HandleEscapeKey()
     {
+        // 휴대폰 애니메이션 중에는 ESC 입력 무시
+        // 메인 메뉴가 열리는 것도 방지
+        if (phoneUIController != null &&
+            phoneUIController.IsAnimating)
+        {
+            return;
+        }
+
+        // 휴대폰이 열려 있으면 휴대폰만 닫고 종료
+        if (phoneUIController != null &&
+            phoneUIController.IsOpen)
+        {
+            phoneUIController.ClosePhone();
+
+            // 현재는 Closing 상태이므로 일시정지를 유지
+            // 닫기 완료 이벤트에서 다시 복구
+            UpdateGameState();
+
+            return;
+        }
+
         // 열려있는 패널이 있다면 그것부터 닫기
         if (IsAnyPopupOpen())
         {
@@ -113,7 +150,8 @@ public class UIManager : MonoBehaviour
     private bool IsAnyPopupOpen()
     {
         bool mapOpen = mapPanel != null && mapPanel.activeSelf;
-        bool questOpen = questPanel != null && questPanel.activeSelf;
+        //bool questOpen = questPanel != null && questPanel.activeSelf;
+        bool questOpen = phoneUIController != null && (phoneUIController.IsOpen || phoneUIController.IsAnimating);
         bool invOpen = inventoryPanel != null && inventoryPanel.activeSelf;
 
         return mapOpen || questOpen || invOpen;
@@ -122,7 +160,7 @@ public class UIManager : MonoBehaviour
     private void CloseAllPanels()
     {
         if (mapPanel != null) mapPanel.SetActive(false);
-        if (questPanel != null) questPanel.SetActive(false);
+        //if (questPanel != null) questPanel.SetActive(false);
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
         if (mainMenuManager != null) mainMenuManager.SetMenuVisible(false);
     }
@@ -134,7 +172,7 @@ public class UIManager : MonoBehaviour
             targetPanel.SetActive(false);
         }
 
-        // 🌟 핵심: 창이 닫혔으니 시간, 커서, 미니맵 상태를 다시 계산해라!
+        // 핵심: 창이 닫혔으니 시간, 커서, 미니맵 상태를 다시 계산해라!
         UpdateGameState();
     }
 
@@ -171,21 +209,28 @@ public class UIManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (phoneUIController != null)
+        {
+            phoneUIController.StateChanged -= UpdateGameState;
+        }
+
         Time.timeScale = 1f;
     }
 
     public void OpenQuestPanel()
     {
-        // 1. 메인 메뉴를 포함한 기존 모든 팝업 닫기
-        CloseAllPanels();
+        if (mapPanel != null)
+            mapPanel.SetActive(false);
 
-        // 2. 퀘스트 패널 활성화
-        if (questPanel != null)
-        {
-            questPanel.SetActive(true);
-        }
+        if (inventoryPanel != null)
+            inventoryPanel.SetActive(false);
 
-        // 3. UI 상태(시간, 커서, 미니맵 등) 동기화
+        if (mainMenuManager != null)
+            mainMenuManager.SetMenuVisible(false);
+
+        if (phoneUIController != null)
+            phoneUIController.OpenPhone();
+
         UpdateGameState();
     }
 }

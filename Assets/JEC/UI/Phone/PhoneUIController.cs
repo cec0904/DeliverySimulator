@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using static UnityEngine.CullingGroup;
 
 public class PhoneUIController : MonoBehaviour
 {
@@ -29,6 +31,8 @@ public class PhoneUIController : MonoBehaviour
     public bool IsOpen => isOpen;
     public bool IsAnimating => isAnimating;
 
+    public event Action StateChanged;
+
     private void Awake()
     {
         if (phoneMotionRoot == null)
@@ -45,29 +49,42 @@ public class PhoneUIController : MonoBehaviour
         closedScale = phoneMotionRoot.localScale;
     }
 
-    private void Update()
+    public void TogglePhone()
     {
         if (isAnimating)
         {
             return;
         }
 
-        if (KeyManager.Instance == null || KeyManager.Instance.IsWaitingForKey)
+        if (isOpen)
+        {
+            StartCoroutine(ClosePhoneRoutine());
+        }
+        else
+        {
+            StartCoroutine(OpenPhoneRoutine());
+        }
+    }
+
+    public void OpenPhone()
+    {
+        if (isAnimating || isOpen)
         {
             return;
         }
 
-        if (Input.GetKeyDown(KeyManager.Instance.questKey))
+        StartCoroutine(OpenPhoneRoutine());
+    }
+
+    public void ClosePhone()
+    {
+        if (isAnimating || !isOpen)
         {
-            if (isOpen)
-            {
-                StartCoroutine(ClosePhoneRoutine());
-            }
-            else
-            {
-                StartCoroutine(OpenPhoneRoutine());
-            }
+            return;
         }
+            
+
+        StartCoroutine(ClosePhoneRoutine());
     }
 
     private IEnumerator OpenPhoneRoutine()
@@ -84,6 +101,8 @@ public class PhoneUIController : MonoBehaviour
 
         isOpen = true;
         isAnimating = false;
+
+        StateChanged?.Invoke();
     }
 
     private IEnumerator ClosePhoneRoutine()
@@ -99,6 +118,8 @@ public class PhoneUIController : MonoBehaviour
 
         isOpen = false;
         isAnimating = false;
+
+        StateChanged?.Invoke();
     }
 
     private IEnumerator AnimateTo(Vector2 targetPosition, float targetRotationZ, Vector3 targetScale, float duration)

@@ -34,6 +34,8 @@ public class PlayerQuestList : MonoBehaviour
 
     public IReadOnlyList<QuestRuntimeData> SelectedQuests => selectedQuests;
 
+    public event Action QuestsChanged;
+
     public bool TryAddQuest(QuestRuntimeData quest)
     {
         if (quest == null || selectedQuests.Contains(quest))
@@ -43,6 +45,7 @@ public class PlayerQuestList : MonoBehaviour
 
         quest.state = QuestState.Accepted;
         selectedQuests.Add(quest);
+        QuestsChanged?.Invoke();
 
         return true;
     }
@@ -57,6 +60,7 @@ public class PlayerQuestList : MonoBehaviour
         }
 
         quest.state = QuestState.PickedUp;
+        QuestsChanged?.Invoke();
     }
 
     public void CompleteQuest(string runtimeQuestId)
@@ -70,6 +74,7 @@ public class PlayerQuestList : MonoBehaviour
 
         quest.state = QuestState.Completed;
         selectedQuests.Remove(quest);
+        QuestsChanged?.Invoke();
     }
 
     public void FailQuest(string runtimeQuestId)
@@ -83,6 +88,7 @@ public class PlayerQuestList : MonoBehaviour
 
         quest.state = QuestState.Failed;
         selectedQuests.Remove(quest);
+        QuestsChanged?.Invoke();
     }
 
     public QuestRuntimeData FindQuest(string runtimeQuestId)

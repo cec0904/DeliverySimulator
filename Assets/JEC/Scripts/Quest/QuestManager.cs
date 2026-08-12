@@ -23,10 +23,42 @@ public class questManager : MonoBehaviour
 
     private Coroutine offerRoutine;
 
+    public void RefreshOffers()
+    {
+        questOffers.Clear();
+
+        for (int i = 0; i < MaxOfferCount; i++)
+        {
+            QuestRuntimeData newQuest = CreateRandomQuest();
+
+            if (newQuest != null)
+            {
+                questOffers.Add(newQuest);
+            }
+        }
+
+        OffersChanged?.Invoke();
+    }
+
+
     private void OnEnable()
     {
+        RefreshOffers();
         offerRoutine = StartCoroutine(CreateQuestOfferRoutine());
     }
+    private IEnumerator RefreshOfferRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSecondsRealtime(
+                Mathf.Max(1f, OfferInterval)
+            );
+
+            RefreshOffers();
+        }
+    }
+
+    
 
     private void OnDisable()
     {

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class questManager : MonoBehaviour
 {
-    private const int MaxOfferCount = 5;
+    [SerializeField] private int MaxOfferCount = 5;
 
     // 퀘스트 갱신(생성) 시간
     [SerializeField] private float OfferInterval = 60f;
@@ -37,6 +37,8 @@ public class questManager : MonoBehaviour
             }
         }
 
+        Debug.Log($"[QuestManager] 퀘스트 갱신 완료 / 개수: {questOffers.Count} / 시간: {Time.realtimeSinceStartup}");
+
         OffersChanged?.Invoke();
     }
 
@@ -44,7 +46,7 @@ public class questManager : MonoBehaviour
     private void OnEnable()
     {
         RefreshOffers();
-        offerRoutine = StartCoroutine(CreateQuestOfferRoutine());
+        offerRoutine = StartCoroutine(RefreshOfferRoutine());
     }
     private IEnumerator RefreshOfferRoutine()
     {

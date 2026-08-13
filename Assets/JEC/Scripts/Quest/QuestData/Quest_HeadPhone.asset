@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_HeadPhone
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 11
-  displayName: 
+  displayName: "\uD5E4\uB4DC\uD3F0 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 06a0826b039c5c04ebf353979f3e7558, type: 3}
   baseReward: 0

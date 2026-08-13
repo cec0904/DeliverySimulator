@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_BagelSandwich
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 1
-  displayName: 
+  displayName: "\uBCA0\uC774\uAE00 \uC0CC\uB4DC\uC704\uCE58 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 4cd606b86a5f0034e9c0fb19e7412ec9, type: 3}
   baseReward: 0

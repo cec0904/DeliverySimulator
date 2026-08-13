@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_CannedFood
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 4
-  displayName: 
+  displayName: "\uCE94 \uD1B5\uC870\uB9BC \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 71725c852ecd6314b87b46f71528bf2d, type: 3}
   baseReward: 0

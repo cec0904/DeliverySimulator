@@ -215,9 +215,7 @@ public class PhoneQuestUIController : MonoBehaviour
 
     private void RefreshNewQuestList()
     {
-        if (newQuestContent == null ||
-            questItemPrefab == null ||
-            questManager == null)
+        if (newQuestContent == null || questItemPrefab == null || questManager == null)
         {
             return;
         }
@@ -234,19 +232,13 @@ public class PhoneQuestUIController : MonoBehaviour
 
             string questId = quest.runtimeQuestId;
 
-            item.Bind(
-                quest,
-                true,
-                () => AcceptQuest(questId)
-            );
+            item.Bind(quest, () => AcceptQuest(questId), () => CancelNewQuest(questId));
         }
     }
 
     private void RefreshAcceptedQuestList()
     {
-        if (acceptedQuestContent == null ||
-            questItemPrefab == null ||
-            playerQuestList == null)
+        if (acceptedQuestContent == null || questItemPrefab == null || playerQuestList == null)
         {
             return;
         }
@@ -261,15 +253,22 @@ public class PhoneQuestUIController : MonoBehaviour
             QuestItemUI item =
                 Instantiate(questItemPrefab, acceptedQuestContent);
 
-            item.Bind(
-                quest,
-                false,
-                null
-            );
+            string questId = quest.runtimeQuestId;
+
+            item.Bind(quest, null, () => CancelAcceptedQuest(questId));
         }
     }
 
     private void AcceptQuest(string runtimeQuestId)
+    {
+        if (questManager == null)
+        {
+            return;
+        }
+
+        questManager.TryAcceptQuest(runtimeQuestId);
+    }
+    private void CancelQuest(string runtimeQuestId)
     {
         if (questManager == null)
         {
@@ -285,5 +284,25 @@ public class PhoneQuestUIController : MonoBehaviour
         {
             Destroy(content.GetChild(i).gameObject);
         }
+    }
+
+    private void CancelNewQuest(string runtimeQuestId)
+    {
+        if (questManager == null)
+        {
+            return;
+        }
+
+        questManager.TryCancelQuestOffer(runtimeQuestId);
+    }
+
+    private void CancelAcceptedQuest(string runtimeQuestId)
+    {
+        if (playerQuestList == null)
+        {
+            return;
+        }
+
+        playerQuestList.TryCancelQuest(runtimeQuestId);
     }
 }

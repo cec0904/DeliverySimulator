@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_Milk
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 12
-  displayName: 
+  displayName: "\uC6B0\uC720 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 7b5f26c70c86a52459b8a71ef35cdf34, type: 3}
   baseReward: 0

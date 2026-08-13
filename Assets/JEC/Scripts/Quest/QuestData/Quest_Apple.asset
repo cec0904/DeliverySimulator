@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_Apple
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 0
-  displayName: 
+  displayName: "\uC0AC\uACFC \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: fa546a00e41b6d3469d518caca3d81ff, type: 3}
   baseReward: 0

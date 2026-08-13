@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_BlueberryBagel
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 2
-  displayName: 
+  displayName: "\uBE14\uB8E8\uBCA0\uB9AC \uBCA0\uC774\uAE00 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 05a40ecbbd9b9164e92716991ba3112d, type: 3}
   baseReward: 0

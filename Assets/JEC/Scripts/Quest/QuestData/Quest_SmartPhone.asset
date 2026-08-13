@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_SmartPhone
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 13
-  displayName: 
+  displayName: "\uC2A4\uB9C8\uD2B8\uD3F0 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 76b3494f30e587147ac8442b266a1368, type: 3}
   baseReward: 0

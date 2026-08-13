@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class questManager : MonoBehaviour
 {
-    [SerializeField] private int MaxOfferCount = 5;
+    [SerializeField] private int MaxQuestsPerRefresh = 1;
+    [SerializeField] private int MaxRefreshQuestCount = 10;
 
     // 퀘스트 갱신(생성) 시간
     [SerializeField] private float OfferInterval = 60f;
@@ -23,31 +24,38 @@ public class questManager : MonoBehaviour
 
     private Coroutine offerRoutine;
 
-    public void RefreshOffers()
-    {
-        questOffers.Clear();
-
-        for (int i = 0; i < MaxOfferCount; i++)
-        {
-            QuestRuntimeData newQuest = CreateRandomQuest();
-
-            if (newQuest != null)
-            {
-                questOffers.Add(newQuest);
-            }
-        }
-
-        Debug.Log($"[QuestManager] 퀘스트 갱신 완료 / 개수: {questOffers.Count} / 시간: {Time.realtimeSinceStartup}");
-
-        OffersChanged?.Invoke();
-    }
-
-
     private void OnEnable()
     {
         RefreshOffers();
-        offerRoutine = StartCoroutine(RefreshOfferRoutine());
+        StartOfferRoutine();
     }
+
+    private void OnDisable()
+    {
+        StopOfferRoutine();
+    }
+
+    private void StartOfferRoutine()
+    {
+        StopOfferRoutine();
+
+        if (isActiveAndEnabled)
+        {
+            offerRoutine = StartCoroutine(RefreshOfferRoutine());
+        }
+    }
+
+    private void StopOfferRoutine()
+    {
+        if (offerRoutine == null)
+        {
+            return;
+        }
+
+        StopCoroutine(offerRoutine);
+        offerRoutine = null;
+    }
+
     private IEnumerator RefreshOfferRoutine()
     {
         while (true)
@@ -60,15 +68,50 @@ public class questManager : MonoBehaviour
         }
     }
 
-    
-
-    private void OnDisable()
+    public void RefreshOffers()
     {
-        if (offerRoutine != null)
+        int maximumOfferCount = Mathf.Max(0, MaxRefreshQuestCount);
+
+        // 새로운 퀘스트 목록이 꽉 찼으면 아무것도 하지 않음
+        if (questOffers.Count >= maximumOfferCount)
         {
-            StopCoroutine(offerRoutine);
-            offerRoutine = null;
+            return;
         }
+
+        int remainingSlots = maximumOfferCount - questOffers.Count;
+
+        int questsToCreate = Mathf.Min(
+            Mathf.Max(0, MaxQuestsPerRefresh),
+            remainingSlots
+        );
+
+        int addedCount = 0;
+
+        for (int i = 0; i < questsToCreate; i++)
+        {
+            QuestRuntimeData newQuest = CreateRandomQuest();
+
+            if (newQuest == null)
+            {
+                continue;
+            }
+
+            questOffers.Add(newQuest);
+            addedCount++;
+        }
+
+        // 실제로 추가된 퀘스트가 없으면 UI도 갱신하지 않음
+        if (addedCount == 0)
+        {
+            return;
+        }
+
+        Debug.Log(
+            $"[QuestManager] 퀘스트 {addedCount}개 추가 / " +
+            $"현재 개수: {questOffers.Count}/{maximumOfferCount}"
+        );
+
+        OffersChanged?.Invoke();
     }
 
     private IEnumerator CreateQuestOfferRoutine()
@@ -115,7 +158,7 @@ public class questManager : MonoBehaviour
 
     public bool TryAddRandomQuestOffer()
     {
-        if (questOffers.Count >= MaxOfferCount)
+        if (questOffers.Count >= MaxRefreshQuestCount)
         {
             return false;
         }
@@ -145,13 +188,34 @@ public class questManager : MonoBehaviour
             return false;
         }
 
+        // PlayerQuestList 이벤트가 실행되기 전에 새로운 퀘스트 목록에서 제거
+        questOffers.Remove(quest);
+
         if (!playerQuestList.TryAddQuest(quest))
+        {
+            questOffers.Add(quest);
+            return false;
+        }
+
+        OffersChanged?.Invoke();
+        return true;
+    }
+
+    public bool TryCancelQuestOffer(string runtimeQuestId)
+    {
+        QuestRuntimeData quest = questOffers.Find(offer => offer.runtimeQuestId == runtimeQuestId);
+
+        if (quest == null)
         {
             return false;
         }
 
         questOffers.Remove(quest);
         OffersChanged?.Invoke();
+
+        // 취소한 순간부터 OfferInterval을 다시 계산
+        StartOfferRoutine();
+
         return true;
     }
 

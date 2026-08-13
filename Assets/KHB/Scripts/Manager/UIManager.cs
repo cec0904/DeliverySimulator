@@ -20,6 +20,9 @@ public class UIManager : MonoBehaviour
     // 폰 애니메이션 연출 전용 컨트롤러
     [SerializeField] private PhoneUIController phoneUIController;
 
+    [Header("[ 인게임 HUD ]")]
+    [SerializeField] private GameObject inventoryHUD;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -199,6 +202,10 @@ public class UIManager : MonoBehaviour
 
         if (minimapPanel != null) minimapPanel.SetActive(!isAnyUIOpen);
         if (minimapCamera != null) minimapCamera.enabled = !isAnyUIOpen;
+        if (inventoryHUD != null)
+        {
+            inventoryHUD.SetActive(!isAnyUIOpen);
+        }
     }
 
     private void OnDisable()

@@ -13,11 +13,12 @@ public class QuestItemUI : MonoBehaviour
 
     [Header("버튼")]
     [SerializeField] private Button acceptButton;
+    [SerializeField] private Button cancelButton;
 
     public void Bind(
-        QuestRuntimeData quest,
-        bool showAcceptButton,
-        Action onAccept)
+    QuestRuntimeData quest,
+    Action onAccept,
+    Action onCancel)
     {
         if (quest == null)
         {
@@ -60,20 +61,30 @@ public class QuestItemUI : MonoBehaviour
 
         if (itemIcon != null)
         {
-            itemIcon.texture =
-                quest.questData != null
+            itemIcon.texture = quest.questData != null
                 ? quest.questData.icon
                 : null;
         }
 
         if (acceptButton != null)
         {
-            acceptButton.gameObject.SetActive(showAcceptButton);
             acceptButton.onClick.RemoveAllListeners();
+            acceptButton.gameObject.SetActive(onAccept != null);
 
-            if (showAcceptButton && onAccept != null)
+            if (onAccept != null)
             {
                 acceptButton.onClick.AddListener(() => onAccept.Invoke());
+            }
+        }
+
+        if (cancelButton != null)
+        {
+            cancelButton.onClick.RemoveAllListeners();
+            cancelButton.gameObject.SetActive(onCancel != null);
+
+            if (onCancel != null)
+            {
+                cancelButton.onClick.AddListener(() => onCancel.Invoke());
             }
         }
     }

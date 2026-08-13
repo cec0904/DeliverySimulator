@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_BurgerCombo
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 3
-  displayName: 
+  displayName: "\uD584\uBC84\uAC70 \uC138\uD2B8 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: e70b2aed803ed3e4195694f028994e3b, type: 3}
   baseReward: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_ToiletPaperRoll
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 14
-  displayName: 
+  displayName: "\uD654\uC7A5\uC9C0 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 42b4299442f414c4f8dae46144124122, type: 3}
   baseReward: 0

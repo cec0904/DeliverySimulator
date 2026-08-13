@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_GamePad
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 9
-  displayName: 
+  displayName: "\uAC8C\uC784 \uD328\uB4DC \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: dd2b9532f33e6664fbb45e9079cba3ec, type: 3}
   baseReward: 0

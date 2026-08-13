@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_Carrot
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 5
-  displayName: 
+  displayName: "\uB2F9\uADFC \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 3c91caa5b748d0c44b4dee95ec6a23ae, type: 3}
   baseReward: 0

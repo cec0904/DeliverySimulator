@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_CheeseBurger
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 6
-  displayName: 
+  displayName: "\uCE58\uC988 \uBC84\uAC70 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 38355f3e18e6c5241947b42d950b7cd1, type: 3}
   baseReward: 0

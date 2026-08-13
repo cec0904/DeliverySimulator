@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quest_GoldenPlainBagel
   m_EditorClassIdentifier: Assembly-CSharp::DeliveryQuestData
   questId: 10
-  displayName: 
+  displayName: "\uACE8\uB4E0 \uD50C\uB808\uC778 \uBCA0\uC774\uAE00 \uBC30\uB2EC"
   description: 
   icon: {fileID: 2800000, guid: 2005cd02f460d8f418284dc38ef42539, type: 3}
   baseReward: 0

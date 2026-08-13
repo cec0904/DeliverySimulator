@@ -4,12 +4,11 @@ public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] private GameObject mainButtonsPanel;
     [SerializeField] private GameObject keySettingPanel;
-    [SerializeField] private GameObject optionPanel; 
-    //[SerializeField] private GameObject exitPanel;
+    //[SerializeField] private GameObject optionPanel; 
+    [SerializeField] private GameObject exitPanel;
     public bool IsOpen => gameObject.activeSelf;
 
-    public bool IsSubPanelOpen => (keySettingPanel != null && keySettingPanel.activeSelf) ||
-                                  (optionPanel != null && optionPanel.activeSelf);
+    public bool IsSubPanelOpen => (keySettingPanel != null && keySettingPanel.activeSelf);
                                   
 
     public void SetMenuVisible(bool visible)
@@ -24,7 +23,6 @@ public class MainMenuManager : MonoBehaviour
     {
         if (mainButtonsPanel != null) mainButtonsPanel.SetActive(true);
         if (keySettingPanel != null) keySettingPanel.SetActive(false);
-        if (optionPanel != null) optionPanel.SetActive(false);
 
     }
 
@@ -38,14 +36,18 @@ public class MainMenuManager : MonoBehaviour
     }
     public void OnClickKeySetting()
     {
-        mainButtonsPanel.SetActive(false);
-        keySettingPanel.SetActive(true);
-    }
+        if (mainButtonsPanel != null)
+            mainButtonsPanel.SetActive(false);
 
-    public void OnClickOption()
+        if (keySettingPanel != null)
+            keySettingPanel.SetActive(true);
+    }
+    public void OnClickMap()
     {
-        mainButtonsPanel.SetActive(false);
-        optionPanel.SetActive(true);
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.OpenMapPanel();
+        }
     }
     public void OnClickBackButton()
     {
@@ -63,6 +65,14 @@ public class MainMenuManager : MonoBehaviour
 
             UIManager.Instance.CloseMainMenu();
         }
+    }
+    public void OnClickCloseKeySetting()
+    {
+        if (keySettingPanel != null)
+            keySettingPanel.SetActive(false);
+
+        if (mainButtonsPanel != null)
+            mainButtonsPanel.SetActive(true);
     }
 
     public void OnClickQuitGame()

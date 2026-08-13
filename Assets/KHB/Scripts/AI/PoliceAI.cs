@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using rayzngames;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
@@ -127,7 +128,8 @@ public class PoliceAI : MonoBehaviour
                 animator.SetFloat("Speed", 0f);
             }
         }
-        Debug.Log("<color=blue>[경찰관 AI]</color> 플레이어 체포 완료!");
+        SceneManager.LoadScene(
+        SceneManager.GetActiveScene().buildIndex);
     }
 
     private void GiveUpChase()

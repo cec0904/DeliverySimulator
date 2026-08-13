@@ -10,6 +10,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject mapPanel;
     [SerializeField] private GameObject questPanel;
     [SerializeField] private GameObject inventoryPanel;
+    [SerializeField] private GameObject keySettingPanel;
+
 
     [SerializeField] private MainMenuManager mainMenuManager;
 
@@ -51,6 +53,7 @@ public class UIManager : MonoBehaviour
         if (mapPanel != null) mapPanel.SetActive(false);
         //if (questPanel != null) questPanel.SetActive(false);
         if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        if (keySettingPanel != null) keySettingPanel.SetActive(false);
 
 
         UpdateGameState();
@@ -68,7 +71,7 @@ public class UIManager : MonoBehaviour
         {
             return;
         }
-        
+
         if (Input.GetKeyDown(KeyManager.Instance.mapKey))
         {
             TogglePanel(mapPanel);
@@ -156,8 +159,10 @@ public class UIManager : MonoBehaviour
         //bool questOpen = questPanel != null && questPanel.activeSelf;
         bool questOpen = phoneUIController != null && (phoneUIController.IsOpen || phoneUIController.IsAnimating);
         bool invOpen = inventoryPanel != null && inventoryPanel.activeSelf;
+        bool keySettingOpen = keySettingPanel != null && keySettingPanel.activeSelf;
 
-        return mapOpen || questOpen || invOpen;
+
+        return mapOpen || questOpen || invOpen || keySettingOpen;
     }
 
     private void CloseAllPanels()
@@ -238,6 +243,21 @@ public class UIManager : MonoBehaviour
         if (phoneUIController != null)
             phoneUIController.OpenPhone();
 
+        UpdateGameState();
+    }
+    public void OpenMapPanel()
+    {
+        if (mapPanel == null)
+            return;
+
+        // 메인 메뉴 닫기
+        if (mainMenuManager != null)
+            mainMenuManager.SetMenuVisible(false);
+
+        // 지도 열기
+        mapPanel.SetActive(true);
+
+        // UI 상태 갱신
         UpdateGameState();
     }
 }

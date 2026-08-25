@@ -35,6 +35,7 @@ public class PlayerQuestList : MonoBehaviour
     public IReadOnlyList<QuestRuntimeData> SelectedQuests => selectedQuests;
 
     public event Action QuestsChanged;
+    public event Action<QuestRuntimeData> QuestCompleted;
 
     public bool TryAddQuest(QuestRuntimeData quest)
     {
@@ -82,14 +83,57 @@ public class PlayerQuestList : MonoBehaviour
     {
         QuestRuntimeData quest = FindQuest(runtimeQuestId);
 
-        if (quest == null || quest.state != QuestState.PickedUp)
+        if (!TryCompleteQuest(quest))
         {
             return;
         }
 
-        quest.state = QuestState.Completed;
-        selectedQuests.Remove(quest);
+        QuestCompleted?.Invoke(quest);
         QuestsChanged?.Invoke();
+    }
+
+    public int TryDeliverQuestsAt(QuestDestination destination)
+    {
+        if (destination == null)
+        {
+            return 0;
+        }
+
+        List<QuestRuntimeData> completedQuests = new();
+
+        for (int i = selectedQuests.Count - 1; i >= 0; i--)
+        {
+            QuestRuntimeData quest = selectedQuests[i];
+
+            if (quest == null || quest.state != QuestState.PickedUp)
+            {
+                continue;
+            }
+
+            if (quest.destination != destination)
+            {
+                continue;
+            }
+
+            if (TryCompleteQuest(quest))
+            {
+                completedQuests.Add(quest);
+            }
+        }
+
+        if (completedQuests.Count == 0)
+        {
+            return 0;
+        }
+
+        foreach (QuestRuntimeData completedQuest in completedQuests)
+        {
+            QuestCompleted?.Invoke(completedQuest);
+        }
+
+        QuestsChanged?.Invoke();
+
+        return completedQuests.Count;
     }
 
     public void FailQuest(string runtimeQuestId)
@@ -147,5 +191,18 @@ public class PlayerQuestList : MonoBehaviour
         }
 
         return pickedUpCount;
+    }
+
+    private bool TryCompleteQuest(QuestRuntimeData quest)
+    {
+        if (quest == null || quest.state != QuestState.PickedUp)
+        {
+            return false;
+        }
+
+        quest.state = QuestState.Completed;
+        selectedQuests.Remove(quest);
+
+        return true;
     }
 }

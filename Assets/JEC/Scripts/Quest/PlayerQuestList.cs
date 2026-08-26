@@ -155,6 +155,34 @@ public class PlayerQuestList : MonoBehaviour
         return selectedQuests.Find(quest => quest.runtimeQuestId == runtimeQuestId);
     }
 
+    public bool HasQuestReadyForPickupAt(QuestPickUpPoint pickupPoint)
+    {
+        if (pickupPoint == null)
+        {
+            return false;
+        }
+
+        return selectedQuests.Exists(quest =>
+            quest != null &&
+            quest.state == QuestState.Accepted &&
+            quest.pickupPoint == pickupPoint
+        );
+    }
+
+    public bool HasQuestReadyForDeliveryAt(QuestDestination destination)
+    {
+        if (destination == null)
+        {
+            return false;
+        }
+
+        return selectedQuests.Exists(quest =>
+            quest != null &&
+            quest.state == QuestState.PickedUp &&
+            quest.destination == destination
+        );
+    }
+
     public int TryPickUpQuestsAt(QuestPickUpPoint pickupPoint)
     {
         if (pickupPoint == null)

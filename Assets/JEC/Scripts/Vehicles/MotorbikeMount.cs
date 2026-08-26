@@ -63,6 +63,11 @@ public sealed class MotorbikeMount : Interactable
 
     public bool IsMounted => rider != null;
 
+    public override string GetPromptMessage(GameObject interactor)
+    {
+        return rider == null ? base.GetPromptMessage(interactor) : string.Empty;
+    }
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AddMountSupportToPackagedBikeRigs()
     {
@@ -254,6 +259,10 @@ public sealed class MotorbikeMount : Interactable
 
         SetCameraTarget(cameraTarget != null ? cameraTarget : transform);
         promptMessage = "오토바이에서 내리려면 F를 누르세요.";
+        NpcQuestUIController.CreateIfMissing()?.ShowTimedInteractionPrompt(
+            "오토바이에서 내리려면 <color=#FFD36A>F키</color>를 누르세요",
+            5f
+        );
         nextInputTime = Time.time + inputCooldown;
     }
 
@@ -284,6 +293,8 @@ public sealed class MotorbikeMount : Interactable
     // 오토바이 하차
     private void Dismount()
     {
+        NpcQuestUIController.CreateIfMissing()?.CancelTimedInteractionPrompt();
+
         Transform departingRider = rider;
 
         Vector3 exitPosition = dismountPoint != null

@@ -16,12 +16,16 @@ public class MapController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     private Vector2 lastPointerPosition;
 
     public float CurrentZoom => currentZoom;
+    private Vector3 baseScale;
+    private Vector2 basePosition;
 
     private void Start()
     {
         currentZoom = 1f;
-        mapContent.localScale = Vector3.one;
-        ClampPosition();
+        basePosition = mapContent.anchoredPosition;
+        baseScale = mapContent.localScale;
+        //mapContent.localScale = Vector3.one;
+        mapContent.localScale = new Vector3(baseScale.x * currentZoom, baseScale.y * currentZoom, baseScale.z);
     }
 
     public void OnPointerDown(PointerEventData eventData)
@@ -44,19 +48,27 @@ public class MapController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
     {
         if (Mathf.Approximately(eventData.scrollDelta.y, 0f)) return;
 
-        float oldZoom = currentZoom;
-        currentZoom += eventData.scrollDelta.y > 0f ? zoomSpeed : -zoomSpeed;
-        currentZoom = Mathf.Clamp(currentZoom, minZoom, maxZoom);
+        float newZoom = currentZoom + (eventData.scrollDelta.y > 0f ? zoomSpeed : -zoomSpeed);
+        newZoom = Mathf.Clamp(newZoom, minZoom, maxZoom);
 
-        if (Mathf.Approximately(oldZoom, currentZoom)) return;
+        if (Mathf.Approximately(currentZoom, newZoom)) return;
 
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(mapWindow, eventData.position, eventData.pressEventCamera, out Vector2 mousePosition);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(mapContent, eventData.position, eventData.pressEventCamera, out Vector2 contentPoint);
 
-        Vector2 oldContentPosition = mapContent.anchoredPosition;
-        float zoomRatio = currentZoom / oldZoom;
+        Vector3 beforeWorld = mapContent.TransformPoint(contentPoint);
 
-        mapContent.localScale = Vector3.one * currentZoom;
-        mapContent.anchoredPosition = mousePosition - (mousePosition - oldContentPosition) * zoomRatio;
+        currentZoom = newZoom;
+        mapContent.localScale = new Vector3(baseScale.x * currentZoom, baseScale.y * currentZoom, baseScale.z);
+
+        Vector3 afterWorld = mapContent.TransformPoint(contentPoint);
+
+        Vector3 before = mapWindow.InverseTransformPoint(beforeWorld);
+        Vector3 after = mapWindow.InverseTransformPoint(afterWorld);
+
+        mapContent.anchoredPosition += new Vector2(before.x - after.x, before.y - after.y);
+
+        if (Mathf.Approximately(currentZoom, minZoom))
+            mapContent.anchoredPosition = basePosition;
 
         ClampPosition();
     }
@@ -66,16 +78,15 @@ public class MapController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
         float windowWidth = mapWindow.rect.width;
         float windowHeight = mapWindow.rect.height;
 
-        float contentWidth = mapContent.rect.width * currentZoom;
-        float contentHeight = mapContent.rect.height * currentZoom;
+        float contentWidth = mapContent.rect.width * Mathf.Abs(mapContent.localScale.x);
+        float contentHeight = mapContent.rect.height * Mathf.Abs(mapContent.localScale.y);
 
         float maxX = Mathf.Max(0f, (contentWidth - windowWidth) * 0.5f);
         float maxY = Mathf.Max(0f, (contentHeight - windowHeight) * 0.5f);
 
         Vector2 pos = mapContent.anchoredPosition;
-        pos.x = Mathf.Clamp(pos.x, -maxX, maxX);
-        pos.y = Mathf.Clamp(pos.y, -maxY, maxY);
-
+        pos.x = Mathf.Clamp(pos.x, basePosition.x - maxX, basePosition.x + maxX);
+        pos.y = Mathf.Clamp(pos.y, basePosition.y - maxY, basePosition.y + maxY);
         mapContent.anchoredPosition = pos;
     }
 }

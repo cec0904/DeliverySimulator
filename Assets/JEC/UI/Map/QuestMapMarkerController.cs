@@ -140,7 +140,7 @@ public class QuestMapMarkerController : MonoBehaviour
             changed = true;
         }
 
-        EnsureLegend();
+        // EnsureLegend();
         EnsureMinimapOverlay();
 
         return changed;
@@ -150,7 +150,7 @@ public class QuestMapMarkerController : MonoBehaviour
     {
         ClearDynamicObjects();
         DestroyLegend();
-        EnsureLegend();
+        // EnsureLegend();
         EnsureMinimapOverlay();
 
         if (playerQuestList == null)

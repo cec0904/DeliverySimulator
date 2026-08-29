@@ -11,6 +11,7 @@ public enum ShopType
 
 public class QuestPickUpPoint : Interactable
 {
+    public override bool RequiresTrigger => true;
     [Header("픽업포인트 정보")]
     public string pointId;
     public ShopType shopType;

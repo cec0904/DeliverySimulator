@@ -9,6 +9,7 @@ public class NpcQuestUIController : MonoBehaviour
     [Header("상호작용 안내")]
     [SerializeField] private CanvasGroup interactionGroup;
     [SerializeField] private TMP_Text interactionText;
+    [SerializeField, Min(0f)] private float interactionFadeOutDuration = 0.25f;
 
     [Header("전달 완료")]
     [SerializeField] private CanvasGroup completionGroup;
@@ -205,10 +206,15 @@ public class NpcQuestUIController : MonoBehaviour
     private IEnumerator HideTimedPromptRoutine(float duration)
     {
         yield return new WaitForSecondsRealtime(Mathf.Max(0f, duration));
+        yield return FadeCanvasGroup(
+            interactionGroup,
+            interactionGroup != null ? interactionGroup.alpha : 1f,
+            0f,
+            interactionFadeOutDuration
+        );
 
         timedPromptActive = false;
         timedPromptRoutine = null;
-        SetCanvasGroupVisible(interactionGroup, false);
     }
 
     private IEnumerator ShowCompletionRoutine()

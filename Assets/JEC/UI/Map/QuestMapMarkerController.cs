@@ -19,7 +19,7 @@ public class QuestMapMarkerController : MonoBehaviour
     [SerializeField] private float mapOrthographicSize = 300f;
 
     [Header("마커 크기")]
-    [SerializeField] private float fullMapMarkerSize = 48f;
+    [SerializeField] private float fullMapMarkerSize = 36f;
     [SerializeField] private float minimapMarkerSize = 34f;
 
     private sealed class MarkerBinding
@@ -38,8 +38,8 @@ public class QuestMapMarkerController : MonoBehaviour
     private RectTransform minimapImageRect;
     private RectTransform minimapOverlay;
     private Camera minimapCamera;
+    private PlayerMapMarker fullMapProjection;
     private GameObject legend;
-    private RawImage legendStoreIcon;
     private float nextResolveTime;
 
     private void Start()
@@ -65,6 +65,7 @@ public class QuestMapMarkerController : MonoBehaviour
         }
 
         UpdateMarkerPositions();
+        UpdateNameplateVisibilityForMap();
     }
 
     private void OnDestroy()
@@ -116,6 +117,16 @@ public class QuestMapMarkerController : MonoBehaviour
             changed = true;
         }
 
+        PlayerMapMarker foundProjection = fullMapContent != null
+            ? fullMapContent.GetComponentInChildren<PlayerMapMarker>(true)
+            : null;
+
+        if (foundProjection != fullMapProjection)
+        {
+            fullMapProjection = foundProjection;
+            changed = true;
+        }
+
         RectTransform minimapRoot = FindSceneRectTransform("C_MiniMap");
         RawImage minimapImage = FindRenderTextureImage(minimapRoot);
         RectTransform foundMinimapImageRect = minimapImage != null ? minimapImage.rectTransform : null;
@@ -138,6 +149,7 @@ public class QuestMapMarkerController : MonoBehaviour
     private void RebuildMarkers()
     {
         ClearDynamicObjects();
+        DestroyLegend();
         EnsureLegend();
         EnsureMinimapOverlay();
 
@@ -148,7 +160,6 @@ public class QuestMapMarkerController : MonoBehaviour
 
         HashSet<QuestPickUpPoint> addedStores = new();
         HashSet<QuestDestination> addedDestinations = new();
-        Texture2D firstStoreTexture = null;
 
         foreach (QuestRuntimeData quest in playerQuestList.SelectedQuests)
         {
@@ -163,7 +174,6 @@ public class QuestMapMarkerController : MonoBehaviour
                     ? quest.questData.icon
                     : quest.pickupPoint.RepresentativeIcon;
                 storeTexture ??= defaultStoreMarkerTexture;
-                firstStoreTexture ??= storeTexture;
 
                 markerBindings.Add(CreateMarker(
                     quest.pickupPoint.transform,
@@ -194,13 +204,6 @@ public class QuestMapMarkerController : MonoBehaviour
                     );
                 }
             }
-        }
-
-        if (legendStoreIcon != null)
-        {
-            legendStoreIcon.texture = firstStoreTexture != null
-                ? firstStoreTexture
-                : defaultStoreMarkerTexture;
         }
 
         UpdateMarkerPositions();
@@ -335,6 +338,12 @@ public class QuestMapMarkerController : MonoBehaviour
 
     private Vector2 WorldToFullMapPosition(Vector3 worldPosition)
     {
+        if (fullMapProjection != null &&
+            fullMapProjection.TryWorldToMapPosition(worldPosition, out Vector2 compositeMapPosition))
+        {
+            return compositeMapPosition;
+        }
+
         float aspect = capturedMapSize.x / capturedMapSize.y;
         float halfHeight = mapOrthographicSize;
         float halfWidth = mapOrthographicSize * aspect;
@@ -392,7 +401,7 @@ public class QuestMapMarkerController : MonoBehaviour
 
     private void EnsureLegend()
     {
-        if (legend != null || fullMapRoot == null || panelSprite == null || font == null)
+        if (legend != null || fullMapContent == null || panelSprite == null || font == null)
         {
             return;
         }
@@ -406,12 +415,12 @@ public class QuestMapMarkerController : MonoBehaviour
         legend.layer = LayerMask.NameToLayer("UI");
 
         RectTransform legendRect = legend.GetComponent<RectTransform>();
-        legendRect.SetParent(fullMapRoot, false);
-        legendRect.anchorMin = new Vector2(1f, 0.5f);
-        legendRect.anchorMax = new Vector2(1f, 0.5f);
-        legendRect.pivot = new Vector2(1f, 0.5f);
-        legendRect.anchoredPosition = new Vector2(-35f, 0f);
-        legendRect.sizeDelta = new Vector2(300f, 340f);
+        legendRect.SetParent(fullMapContent, false);
+        legendRect.anchorMin = new Vector2(0.32f, 0.78f);
+        legendRect.anchorMax = new Vector2(0.98f, 0.98f);
+        legendRect.pivot = new Vector2(0.5f, 0.5f);
+        legendRect.anchoredPosition = Vector2.zero;
+        legendRect.sizeDelta = Vector2.zero;
         legendRect.SetAsLastSibling();
 
         Image background = legend.GetComponent<Image>();
@@ -419,29 +428,119 @@ public class QuestMapMarkerController : MonoBehaviour
         background.type = Image.Type.Sliced;
         background.raycastTarget = false;
 
-        TMP_Text title = CreateText(legendRect, "마커 안내", new Vector2(0f, 115f), new Vector2(240f, 50f), 30f, true);
-        title.color = new Color(1f, 0.83f, 0.42f, 1f);
-
-        legendStoreIcon = CreateLegendRow(
+        TMP_Text title = CreateText(
             legendRect,
-            "픽업 가게",
-            defaultStoreMarkerTexture,
-            45f
+            "퀘스트 위치",
+            new Vector2(0f, 60f),
+            new Vector2(760f, 38f),
+            26f,
+            true
         );
+        title.color = Color.black;
 
-        CreateLegendRow(
-            legendRect,
-            "배달 받는 남성",
-            maleNpcMarkerTexture,
-            -30f
-        );
+        CreateAcceptedQuestLegendRows(legendRect);
+    }
 
-        CreateLegendRow(
-            legendRect,
-            "배달 받는 여성",
-            femaleNpcMarkerTexture,
-            -105f
+    private void CreateAcceptedQuestLegendRows(RectTransform legendRect)
+    {
+        if (playerQuestList == null || playerQuestList.SelectedQuests.Count == 0)
+        {
+            TMP_Text emptyText = CreateText(
+                legendRect,
+                "수락한 퀘스트가 없습니다",
+                Vector2.zero,
+                new Vector2(760f, 42f),
+                20f,
+                false
+            );
+            emptyText.color = new Color(0.8f, 0.8f, 0.8f, 1f);
+            return;
+        }
+
+        int questCount = Mathf.Min(playerQuestList.SelectedQuests.Count, 5);
+        const float columnSpacing = 152f;
+        float firstColumnX = -(questCount - 1) * columnSpacing * 0.5f;
+
+        for (int i = 0; i < questCount; i++)
+        {
+            QuestRuntimeData quest = playerQuestList.SelectedQuests[i];
+
+            if (quest == null)
+            {
+                continue;
+            }
+
+            float columnX = firstColumnX + i * columnSpacing;
+            string questName = quest.questData != null &&
+                               !string.IsNullOrWhiteSpace(quest.questData.displayName)
+                ? quest.questData.displayName
+                : $"퀘스트 {i + 1}";
+
+            TMP_Text questTitle = CreateText(
+                legendRect,
+                $"{i + 1}. {questName}",
+                new Vector2(columnX, 20f),
+                new Vector2(142f, 30f),
+                18f,
+                true
+            );
+            questTitle.color = new Color(1f, 0.83f, 0.42f, 1f);
+
+            Texture2D storeTexture = quest.questData != null && quest.questData.icon != null
+                ? quest.questData.icon
+                : quest.pickupPoint != null
+                    ? quest.pickupPoint.RepresentativeIcon
+                    : defaultStoreMarkerTexture;
+            storeTexture ??= defaultStoreMarkerTexture;
+
+            string pickupName = quest.pickupPoint != null
+                ? quest.pickupPoint.DisplayName
+                : "위치 없음";
+            CreateHorizontalLegendRow(
+                legendRect,
+                $"픽업 {pickupName}",
+                storeTexture,
+                columnX,
+                -18f
+            );
+
+            string destinationName = quest.destination != null
+                ? quest.destination.DisplayName
+                : "위치 없음";
+            CreateHorizontalLegendRow(
+                legendRect,
+                $"배달 {destinationName}",
+                GetNpcMarkerTexture(quest.destination),
+                columnX,
+                -58f
+            );
+        }
+    }
+
+    private void CreateHorizontalLegendRow(
+        RectTransform parent,
+        string label,
+        Texture texture,
+        float x,
+        float y
+    )
+    {
+        RectTransform icon = CreateRawMarker(parent, texture, 30f, false);
+        icon.anchoredPosition = new Vector2(x - 54f, y);
+
+        TMP_Text text = CreateText(
+            parent,
+            label,
+            new Vector2(x + 18f, y),
+            new Vector2(108f, 30f),
+            14f,
+            false
         );
+        text.alignment = TextAlignmentOptions.MidlineLeft;
+        text.enableAutoSizing = true;
+        text.fontSizeMin = 10f;
+        text.fontSizeMax = 14f;
+        text.overflowMode = TextOverflowModes.Ellipsis;
     }
 
     private RawImage CreateLegendRow(
@@ -451,7 +550,7 @@ public class QuestMapMarkerController : MonoBehaviour
         float y
     )
     {
-        RectTransform icon = CreateRawMarker(parent, texture, 52f, false);
+        RectTransform icon = CreateRawMarker(parent, texture, 60f, false);
         icon.anchoredPosition = new Vector2(-85f, y);
 
         TMP_Text text = CreateText(
@@ -539,7 +638,6 @@ public class QuestMapMarkerController : MonoBehaviour
         }
 
         legend = null;
-        legendStoreIcon = null;
     }
 
     private void DestroyMinimapOverlay()
@@ -619,5 +717,18 @@ public class QuestMapMarkerController : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void UpdateNameplateVisibilityForMap()
+    {
+        bool fullMapOpen = fullMapRoot != null && fullMapRoot.gameObject.activeInHierarchy;
+
+        foreach (QuestDestinationNameplate nameplate in nameplates.Values)
+        {
+            if (nameplate != null)
+            {
+                nameplate.gameObject.SetActive(!fullMapOpen);
+            }
+        }
     }
 }

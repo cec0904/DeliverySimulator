@@ -10,6 +10,7 @@ public class QuestDestinationNameplate : MonoBehaviour
     private CanvasGroup canvasGroup;
     private Camera targetCamera;
     private float headHeight;
+    private const float MaxVisibleDistance = 30f;
 
     public static QuestDestinationNameplate Create(
         QuestDestination destination,
@@ -33,7 +34,7 @@ public class QuestDestinationNameplate : MonoBehaviour
         rect.anchorMin = new Vector2(0.5f, 0.5f);
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0f);
-        rect.sizeDelta = new Vector2(280f, 58f);
+        rect.sizeDelta = new Vector2(160f, 58f);
 
         Image background = root.GetComponent<Image>();
         background.sprite = compactUiSprite;
@@ -108,6 +109,15 @@ public class QuestDestinationNameplate : MonoBehaviour
             ? anchor.position
             : target.transform.position + Vector3.up * headHeight;
         Vector3 screenPoint = targetCamera.WorldToScreenPoint(worldPosition);
+
+        float sqrDistance =
+            (target.transform.position - targetCamera.transform.position).sqrMagnitude;
+
+        if (sqrDistance > MaxVisibleDistance * MaxVisibleDistance)
+        {
+            SetVisible(false);
+            return;
+        }
 
         bool visible = screenPoint.z > 0f &&
                        screenPoint.x >= 0f && screenPoint.x <= Screen.width &&

@@ -3,6 +3,7 @@ using UnityEngine;
 public class Interactable : MonoBehaviour
 {
     public string promptMessage = "상호작용하려면 F를 누르세요.";
+    public virtual bool RequiresTrigger => false;
 
     public virtual string GetPromptMessage(GameObject interactor)
     {

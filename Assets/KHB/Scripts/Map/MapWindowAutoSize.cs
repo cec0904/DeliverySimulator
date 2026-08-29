@@ -5,7 +5,7 @@ public class MapWindowAutoSize : MonoBehaviour
 {
     [Header("Screen Ratio")]
     [Range(0.1f, 1f)]
-    [SerializeField] private float screenRatio = 0.72f;
+    [SerializeField] private float screenRatio = 1f;
 
     private RectTransform windowRect;
     private RectTransform canvasRect;

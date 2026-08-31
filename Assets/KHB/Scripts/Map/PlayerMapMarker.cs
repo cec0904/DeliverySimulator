@@ -7,6 +7,8 @@ public class PlayerMapMarker : MonoBehaviour
 
     [Header("Map")]
     [SerializeField] private RectTransform mapContent;
+    [SerializeField] private RectTransform exteriorMapRect;
+    [SerializeField] private string exteriorMapObjectName = "Map_Image";
 
     [Header("Captured Map")]
     [SerializeField] private float mapWidth = 1280f;
@@ -118,6 +120,9 @@ public class PlayerMapMarker : MonoBehaviour
             worldPosition.z
         );
 
+        if (TryNormalizedToRect(normalizedX, normalizedY, exteriorMapRect, out mapPosition))
+            return true;
+
         mapPosition = new Vector2(
             (Mathf.Clamp01(normalizedX) - 0.5f) * mapContent.rect.width,
             (Mathf.Clamp01(normalizedY) - 0.5f) * mapContent.rect.height
@@ -140,6 +145,7 @@ public class PlayerMapMarker : MonoBehaviour
         if (mapContent == null)
             return;
 
+        exteriorMapRect ??= FindDescendant(mapContent, exteriorMapObjectName);
         locktStoreMapRect ??= FindDescendant(mapContent, locktStoreMapObjectName);
         shinjuMapRect ??= FindDescendant(mapContent, shinjuMapObjectName);
     }
@@ -168,6 +174,22 @@ public class PlayerMapMarker : MonoBehaviour
             worldCenter.y + worldSize.y * 0.5f,
             worldPosition.z
         );
+
+        return TryNormalizedToRect(normalizedX, normalizedY, targetRect, out mapPosition);
+    }
+
+    private bool TryNormalizedToRect(
+        float normalizedX,
+        float normalizedY,
+        RectTransform targetRect,
+        out Vector2 mapPosition
+    )
+    {
+        if (targetRect == null || mapContent == null)
+        {
+            mapPosition = default;
+            return false;
+        }
 
         Vector3 targetLocalPosition = new(
             (Mathf.Clamp01(normalizedX) - 0.5f) * targetRect.rect.width,

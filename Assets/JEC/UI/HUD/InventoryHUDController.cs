@@ -9,6 +9,9 @@ public class InventoryHUDController : MonoBehaviour
     [Header("물건 아이콘")]
     [SerializeField] private RawImage[] itemIcons;
 
+    [Header("표시 조건")]
+    [SerializeField] private bool showAcceptedQuestItems;
+
     private void Awake()
     {
         if (playerQuestList == null)
@@ -46,19 +49,27 @@ public class InventoryHUDController : MonoBehaviour
             return;
         }
 
-        int count = Mathf.Min(playerQuestList.SelectedQuests.Count, itemIcons.Length);
+        int iconIndex = 0;
 
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < playerQuestList.SelectedQuests.Count && iconIndex < itemIcons.Length; i++)
         {
             QuestRuntimeData quest = playerQuestList.SelectedQuests[i];
 
-            // 아직 픽업하지 않은 퀘스트는 빈 슬롯으로 유지
-            if (quest == null || quest.state != QuestState.PickedUp || quest.questData == null || quest.questData.icon == null)
+            if (quest == null || quest.questData == null || quest.questData.icon == null)
             {
                 continue;
             }
 
-            RawImage itemIcon = itemIcons[i];
+            bool shouldShow = quest.state == QuestState.PickedUp ||
+                              (showAcceptedQuestItems && quest.state == QuestState.Accepted);
+
+            if (!shouldShow)
+            {
+                continue;
+            }
+
+            RawImage itemIcon = itemIcons[iconIndex];
+            iconIndex++;
 
             if (itemIcon == null)
             {

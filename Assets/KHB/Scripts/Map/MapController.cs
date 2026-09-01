@@ -45,7 +45,7 @@ public class MapController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
             return;
 
         if (activeMap == null)
-            activeMap = FindMapAtPointer(eventData.position, eventData.pressEventCamera);
+            activeMap = FindMapAtPointer(eventData);
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             mapWindow,
@@ -79,7 +79,7 @@ public class MapController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
 
         bool zoomingIn = eventData.scrollDelta.y > 0f;
         if (zoomingIn && activeMap == null)
-            activeMap = FindMapAtPointer(eventData.position, eventData.pressEventCamera);
+            activeMap = FindMapAtPointer(eventData);
 
         if (activeMap == null)
             return;
@@ -145,16 +145,38 @@ public class MapController : MonoBehaviour, IPointerDownHandler, IDragHandler, I
         return true;
     }
 
-    private RectTransform FindMapAtPointer(Vector2 screenPoint, Camera eventCamera)
+    private RectTransform FindMapAtPointer(PointerEventData eventData)
     {
-        // The office images overlap the exterior map's rectangle, so test them first.
-        if (ContainsPointer(locktStoreMap, screenPoint, eventCamera))
+        Transform hitTransform = eventData.pointerCurrentRaycast.gameObject != null
+            ? eventData.pointerCurrentRaycast.gameObject.transform
+            : null;
+
+        if (IsInsideMap(hitTransform, locktStoreMap))
             return locktStoreMap;
 
-        if (ContainsPointer(shinjuMap, screenPoint, eventCamera))
+        if (IsInsideMap(hitTransform, shinjuMap))
             return shinjuMap;
 
-        return ContainsPointer(exteriorMap, screenPoint, eventCamera) ? exteriorMap : null;
+        if (IsInsideMap(hitTransform, exteriorMap))
+            return exteriorMap;
+
+        // Markers are siblings of the map images, so retain a geometry fallback.
+        if (ContainsPointer(locktStoreMap, eventData.position, eventData.pressEventCamera))
+            return locktStoreMap;
+
+        if (ContainsPointer(shinjuMap, eventData.position, eventData.pressEventCamera))
+            return shinjuMap;
+
+        return ContainsPointer(exteriorMap, eventData.position, eventData.pressEventCamera)
+            ? exteriorMap
+            : null;
+    }
+
+    private static bool IsInsideMap(Transform hitTransform, RectTransform map)
+    {
+        return hitTransform != null &&
+               map != null &&
+               (hitTransform == map || hitTransform.IsChildOf(map));
     }
 
     private static bool ContainsPointer(

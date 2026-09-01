@@ -24,12 +24,12 @@ public class PlayerMapMarker : MonoBehaviour
 
     [Header("락트소어 사무실")]
     [SerializeField] private string locktStoreMapObjectName = "IndoorOffice";
-    [SerializeField] private Vector2 locktStoreWorldCenter = new(-200f, 2779.27f);
-    [SerializeField] private Vector2 locktStoreWorldSize = new(37.7f, 32.3f);
+    [SerializeField] private Vector2 locktStoreWorldCenter = new(-200.3f, 2782.8f);
+    [SerializeField] private Vector2 locktStoreWorldSize = new(35f, 29.8f);
 
     [Header("신쥬 사무실")]
     [SerializeField] private string shinjuMapObjectName = "IndoorOffice1";
-    [SerializeField] private Vector2 shinjuWorldCenter = new(-200f, 2758.95f);
+    [SerializeField] private Vector2 shinjuWorldCenter = new(-198.9f, 2758.7f);
     [SerializeField] private Vector2 shinjuWorldSize = new(34.5f, 25.9f);
 
     private RectTransform markerRect;

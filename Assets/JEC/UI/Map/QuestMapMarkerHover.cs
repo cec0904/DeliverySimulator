@@ -46,7 +46,7 @@ public class QuestMapMarkerHover : MonoBehaviour, IPointerEnterHandler, IPointer
         tooltipRect.anchorMax = new Vector2(0.5f, 0.5f);
         tooltipRect.pivot = new Vector2(0.5f, 0f);
         tooltipRect.anchoredPosition = new Vector2(0f, 32f);
-        tooltipRect.sizeDelta = new Vector2(160f, 52f);
+        tooltipRect.sizeDelta = new Vector2(160f, 104f);
 
         Image background = tooltip.GetComponent<Image>();
         background.sprite = panelSprite;
@@ -65,16 +65,16 @@ public class QuestMapMarkerHover : MonoBehaviour, IPointerEnterHandler, IPointer
         textRect.SetParent(tooltipRect, false);
         textRect.anchorMin = Vector2.zero;
         textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = new Vector2(24f, 8f);
-        textRect.offsetMax = new Vector2(-24f, -8f);
+        textRect.offsetMin = new Vector2(24f, 16f);
+        textRect.offsetMax = new Vector2(-24f, -16f);
 
         TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
         text.font = font;
         text.text = displayName;
-        text.fontSize = 24f;
+        text.fontSize = 48f;
         text.enableAutoSizing = true;
-        text.fontSizeMin = 16f;
-        text.fontSizeMax = 22f;
+        text.fontSizeMin = 32f;
+        text.fontSizeMax = 44f;
         text.fontStyle = FontStyles.Bold;
         text.alignment = TextAlignmentOptions.Center;
         text.color = Color.white;

@@ -49,6 +49,8 @@ public class CitizenAI : MonoBehaviour
     [SerializeField] private bool isMale;
     [SerializeField] private CitizenAgeType ageType;
 
+    public bool IsMale => isMale;
+
 
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
 

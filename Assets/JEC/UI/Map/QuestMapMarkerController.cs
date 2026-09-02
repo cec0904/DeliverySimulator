@@ -9,6 +9,7 @@ public class QuestMapMarkerController : MonoBehaviour
     [SerializeField] private Texture2D maleNpcMarkerTexture;
     [SerializeField] private Texture2D femaleNpcMarkerTexture;
     [SerializeField] private Texture2D defaultStoreMarkerTexture;
+    [SerializeField] private Sprite motorbikeMarkerSprite;
     [SerializeField] private Sprite compactUiSprite;
     [SerializeField] private Sprite panelSprite;
     [SerializeField] private TMP_FontAsset font;
@@ -21,6 +22,8 @@ public class QuestMapMarkerController : MonoBehaviour
     [Header("마커 크기")]
     [SerializeField] private float fullMapMarkerSize = 36f;
     [SerializeField] private float minimapMarkerSize = 34f;
+    [SerializeField] private float motorbikeFullMapMarkerSize = 70f;
+    [SerializeField] private float motorbikeMinimapMarkerSize = 40f;
 
     private sealed class MarkerBinding
     {
@@ -38,6 +41,9 @@ public class QuestMapMarkerController : MonoBehaviour
     private RectTransform minimapImageRect;
     private RectTransform minimapOverlay;
     private Camera minimapCamera;
+    private MotorbikeMount motorbikeMount;
+    private RectTransform motorbikeFullMapMarker;
+    private RectTransform motorbikeMinimapMarker;
     private PlayerMapMarker fullMapProjection;
     private GameObject legend;
     private float nextResolveTime;
@@ -76,6 +82,7 @@ public class QuestMapMarkerController : MonoBehaviour
         }
 
         ClearDynamicObjects();
+        DestroyMotorbikeMarker();
     }
 
     private bool BindPlayerQuestList()
@@ -111,6 +118,7 @@ public class QuestMapMarkerController : MonoBehaviour
 
         if (foundMapRoot != fullMapRoot || foundMapContent != fullMapContent)
         {
+            DestroyMotorbikeFullMapMarker();
             fullMapRoot = foundMapRoot;
             fullMapContent = foundMapContent;
             DestroyLegend();
@@ -140,8 +148,18 @@ public class QuestMapMarkerController : MonoBehaviour
             changed = true;
         }
 
+        MotorbikeMount foundMotorbikeMount = FindAnyObjectByType<MotorbikeMount>();
+
+        if (foundMotorbikeMount != motorbikeMount)
+        {
+            motorbikeMount = foundMotorbikeMount;
+            DestroyMotorbikeMarker();
+            changed = true;
+        }
+
         // EnsureLegend();
         EnsureMinimapOverlay();
+        EnsureMotorbikeMarker();
 
         return changed;
     }
@@ -152,9 +170,11 @@ public class QuestMapMarkerController : MonoBehaviour
         DestroyLegend();
         // EnsureLegend();
         EnsureMinimapOverlay();
+        EnsureMotorbikeMarker();
 
         if (playerQuestList == null)
         {
+            UpdateMotorbikeMarkerPosition();
             return;
         }
 
@@ -334,6 +354,139 @@ public class QuestMapMarkerController : MonoBehaviour
                 }
             }
         }
+
+        UpdateMotorbikeMarkerPosition();
+    }
+
+    private void EnsureMotorbikeMarker()
+    {
+        if (motorbikeMount == null || motorbikeMarkerSprite == null)
+        {
+            return;
+        }
+
+        if (motorbikeFullMapMarker == null && fullMapContent != null)
+        {
+            motorbikeFullMapMarker = CreateMotorbikeMarker(
+                fullMapContent,
+                "MotorbikeFullMapMarker",
+                motorbikeFullMapMarkerSize
+            );
+        }
+
+        if (motorbikeMinimapMarker == null && minimapOverlay != null)
+        {
+            motorbikeMinimapMarker = CreateMotorbikeMarker(
+                minimapOverlay,
+                "MotorbikeMinimapMarker",
+                motorbikeMinimapMarkerSize
+            );
+        }
+    }
+
+    private RectTransform CreateMotorbikeMarker(RectTransform parent, string markerName, float size)
+    {
+        GameObject marker = new(
+            markerName,
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image)
+        );
+        marker.layer = LayerMask.NameToLayer("UI");
+
+        RectTransform markerRect = marker.GetComponent<RectTransform>();
+        markerRect.SetParent(parent, false);
+        markerRect.anchorMin = new Vector2(0.5f, 0.5f);
+        markerRect.anchorMax = new Vector2(0.5f, 0.5f);
+        markerRect.pivot = new Vector2(0.5f, 0.5f);
+        markerRect.sizeDelta = Vector2.one * size;
+
+        Image markerImage = marker.GetComponent<Image>();
+        markerImage.sprite = motorbikeMarkerSprite;
+        markerImage.preserveAspect = true;
+        markerImage.raycastTarget = false;
+
+        return markerRect;
+    }
+
+    private void UpdateMotorbikeMarkerPosition()
+    {
+        if (motorbikeFullMapMarker == null || motorbikeMinimapMarker == null)
+        {
+            EnsureMotorbikeMarker();
+        }
+
+        if (motorbikeMount == null)
+        {
+            if (motorbikeFullMapMarker != null)
+            {
+                motorbikeFullMapMarker.gameObject.SetActive(false);
+            }
+
+            if (motorbikeMinimapMarker != null)
+            {
+                motorbikeMinimapMarker.gameObject.SetActive(false);
+            }
+
+            return;
+        }
+
+        if (motorbikeFullMapMarker != null && fullMapContent != null)
+        {
+            motorbikeFullMapMarker.gameObject.SetActive(true);
+            motorbikeFullMapMarker.anchoredPosition = WorldToFullMapPosition(
+                motorbikeMount.transform.position
+            );
+            motorbikeFullMapMarker.SetAsLastSibling();
+
+            RectTransform playerArrow = FindDescendant(fullMapContent, "PlayerArrowUI");
+            if (playerArrow != null)
+            {
+                playerArrow.SetAsLastSibling();
+            }
+        }
+
+        if (motorbikeMinimapMarker == null || minimapImageRect == null || minimapCamera == null)
+        {
+            if (motorbikeMinimapMarker != null)
+            {
+                motorbikeMinimapMarker.gameObject.SetActive(false);
+            }
+
+            return;
+        }
+
+        Vector3 viewport = minimapCamera.WorldToViewportPoint(motorbikeMount.transform.position);
+        bool visible = viewport.z > 0f;
+        motorbikeMinimapMarker.gameObject.SetActive(visible);
+
+        if (!visible)
+        {
+            return;
+        }
+
+        if (motorbikeMinimapMarker.GetSiblingIndex() != minimapOverlay.childCount - 1)
+        {
+            motorbikeMinimapMarker.SetAsLastSibling();
+        }
+
+        Rect rect = minimapImageRect.rect;
+        Vector2 localPosition = new(
+            (viewport.x - 0.5f) * rect.width,
+            (viewport.y - 0.5f) * rect.height
+        );
+
+        float radius = Mathf.Max(
+            0f,
+            Mathf.Min(rect.width, rect.height) * 0.5f - motorbikeMinimapMarkerSize * 0.65f
+        );
+
+        if (localPosition.sqrMagnitude > radius * radius)
+        {
+            localPosition = localPosition.normalized * radius;
+        }
+
+        motorbikeMinimapMarker.anchoredPosition = localPosition;
     }
 
     private Vector2 WorldToFullMapPosition(Vector3 worldPosition)
@@ -648,6 +801,29 @@ public class QuestMapMarkerController : MonoBehaviour
         }
 
         minimapOverlay = null;
+        motorbikeMinimapMarker = null;
+    }
+
+    private void DestroyMotorbikeMarker()
+    {
+        DestroyMotorbikeFullMapMarker();
+
+        if (motorbikeMinimapMarker != null)
+        {
+            Destroy(motorbikeMinimapMarker.gameObject);
+        }
+
+        motorbikeMinimapMarker = null;
+    }
+
+    private void DestroyMotorbikeFullMapMarker()
+    {
+        if (motorbikeFullMapMarker != null)
+        {
+            Destroy(motorbikeFullMapMarker.gameObject);
+        }
+
+        motorbikeFullMapMarker = null;
     }
 
     private static RectTransform FindSceneRectTransform(string objectName)

@@ -15,11 +15,30 @@ public class SpeedTrapZone : MonoBehaviour
     [Header("경찰 지원 호출 범위")]
     [Tooltip("과속 감지 시 신호를 받아 출동할 주변 경찰차 수색 반경")]
     public float policeSearchRadius = 100f;
+    private SphereCollider sphereCollider;
 
     [Tooltip("재감지 쿨타임 (초)")]
     public float cooldownTime = 5f;
     private bool isCooldown = false;
 
+    // 경고 UI
+    public GameObject speedTrapUI;
+
+    private void Awake()
+    {
+        sphereCollider = GetComponent<SphereCollider>();
+    }
+
+    private void OnValidate()
+    {
+        if (sphereCollider == null)
+            sphereCollider = GetComponent<SphereCollider>();
+
+        if (sphereCollider != null)
+        {
+            sphereCollider.radius = policeSearchRadius;
+        }
+    }
 
     private void OnTriggerStay(Collider other)
     {
@@ -81,6 +100,7 @@ public class SpeedTrapZone : MonoBehaviour
         {
             // 이 함수 내부에서 nearestPolice.currentState = PoliceState.Intercept 가 수행됨
             nearestPolice.StartIntercept(targetPlayer);
+
             return true;
         }
 
@@ -95,6 +115,32 @@ public class SpeedTrapZone : MonoBehaviour
         isCooldown = false;
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+
+        Debug.Log("Trigger 진입: " + other.name);
+        BicycleVehicle bicycle = other.GetComponentInParent<BicycleVehicle>();
+
+        if (bicycle != null)
+        {
+            Debug.Log("BicycleVehicle 발견");
+            speedTrapUI.SetActive(true);
+        }
+        else
+        {
+            Debug.LogWarning("BicycleVehicle을 찾지 못함");
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        BicycleVehicle bicycle = other.GetComponentInParent<BicycleVehicle>();
+
+        if (bicycle != null)
+        {
+            speedTrapUI.SetActive(false);
+        }
+    }
 
     #region 시각화 (Gizmos)
 

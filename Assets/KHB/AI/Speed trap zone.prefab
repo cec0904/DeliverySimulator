@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3176750954598162930}
   - component: {fileID: 4859512918235344471}
-  - component: {fileID: 5600576415761519447}
+  - component: {fileID: 2037434381945690063}
   m_Layer: 0
   m_Name: Speed trap zone
   m_TagString: Untagged
@@ -48,8 +48,9 @@ MonoBehaviour:
   speedLimitKmh: 30
   policeSearchRadius: 30
   cooldownTime: 5
---- !u!65 &5600576415761519447
-BoxCollider:
+  speedTrapUI: {fileID: 0}
+--- !u!135 &2037434381945690063
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -67,5 +68,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}

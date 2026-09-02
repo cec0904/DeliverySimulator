@@ -621,6 +621,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NpcQuestUIController
   interactionGroup: {fileID: 5518418159991899599}
   interactionText: {fileID: 8572273931950425341}
+  interactionFadeOutDuration: 0.25
   completionGroup: {fileID: 3853536361922744103}
   completionTitleText: {fileID: 5381920261177534701}
   npcNameText: {fileID: 226058390852012375}
@@ -647,7 +648,7 @@ MonoBehaviour:
   mapWorldCenter: {x: -371, y: 10}
   capturedMapSize: {x: 1280, y: 720}
   mapOrthographicSize: 300
-  fullMapMarkerSize: 48
+  fullMapMarkerSize: 36
   minimapMarkerSize: 34
 --- !u!1 &7588374206825467160
 GameObject:

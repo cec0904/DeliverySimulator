@@ -5,14 +5,14 @@ public class StartMenuManager : MonoBehaviour
 {
     public void PlayGame()
     {
-        Debug.Log("버튼이 클릭되었습니다! 씬 로드를 시도합니다.");
+        //Debug.Log("버튼이 클릭되었습니다! 씬 로드를 시도합니다.");
         SceneManager.LoadScene("MainScene_v03");
     }
 
     // [게임 종료] 버튼 클릭 시 실행할 함수
     public void QuitGame()
     {
-        Debug.Log("종료 버튼이 클릭되었습니다! ");
+        //Debug.Log("종료 버튼이 클릭되었습니다! ");
 
 #if UNITY_EDITOR
         // 유니티 에디터 상에서 테스트할 때

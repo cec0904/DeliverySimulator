@@ -55,6 +55,9 @@ public class PoliceCarAI : MonoBehaviour
     private bool isDeploying = false; // 코루틴 중복 실행 방지 플래그
     private float lastRepredictTime;
 
+    // 사운드
+    public AudioSource sirenAudio;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -77,6 +80,7 @@ public class PoliceCarAI : MonoBehaviour
                 break;
 
             case PoliceState.Intercept:
+
                 ValidateAndRepredict();
                 CheckIfPathBlocked();
                 DriveNaturally();
@@ -97,6 +101,11 @@ public class PoliceCarAI : MonoBehaviour
         targetPlayer = player;
         currentState = PoliceState.Intercept;
         isDeploying = false;
+
+        if (sirenAudio != null)
+        {
+            sirenAudio.Play();
+        }
 
         agent.speed = chaseSpeed;
         agent.isStopped = false;

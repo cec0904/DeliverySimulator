@@ -56,7 +56,7 @@ public class SpeedTrapZone : MonoBehaviour
             // 2. 제한 속도 초과 판정
             if (speedKmh > speedLimitKmh)
             {
-                Debug.Log($"[단속 감지] 속도 위반! ({speedKmh:F1} km/h)");
+                //Debug.Log($"[단속 감지] 속도 위반! ({speedKmh:F1} km/h)");
 
                 // 3. 근처 대기 중인 경찰차(Car)를 찾아서 상태 변경 및 출동 명령
                 bool dispatched = DispatchNearestPolice(bicycle);
@@ -104,7 +104,7 @@ public class SpeedTrapZone : MonoBehaviour
             return true;
         }
 
-        Debug.Log("주변에 출동 가능한 대기 상태(Idle)의 경찰차가 없습니다.");
+        //Debug.Log("주변에 출동 가능한 대기 상태(Idle)의 경찰차가 없습니다.");
         return false;
     }
 
@@ -118,18 +118,14 @@ public class SpeedTrapZone : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
 
-        Debug.Log("Trigger 진입: " + other.name);
         BicycleVehicle bicycle = other.GetComponentInParent<BicycleVehicle>();
 
         if (bicycle != null)
         {
-            Debug.Log("BicycleVehicle 발견");
+            
             speedTrapUI.SetActive(true);
         }
-        else
-        {
-            Debug.LogWarning("BicycleVehicle을 찾지 못함");
-        }
+
     }
 
     private void OnTriggerExit(Collider other)
@@ -142,68 +138,68 @@ public class SpeedTrapZone : MonoBehaviour
         }
     }
 
-    #region 시각화 (Gizmos)
+//    #region 시각화 (Gizmos)
 
-    private void OnDrawGizmos()
-    {
-        // Collider 컴포넌트 가져오기
-        Collider col = GetComponent<Collider>();
-        if (col == null) return;
+//    private void OnDrawGizmos()
+//    {
+//        // Collider 컴포넌트 가져오기
+//        Collider col = GetComponent<Collider>();
+//        if (col == null) return;
 
-        // 1. 감지 구역 칼라 설정 (기본: 반투명 노란색)
-        Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.3f);
+//        // 1. 감지 구역 칼라 설정 (기본: 반투명 노란색)
+//        Gizmos.color = new Color(1f, 0.92f, 0.016f, 0.3f);
 
-        // 2. Collider 종류(Box/Sphere)에 따른 영역 채우기 및 외곽선 그리기
-        if (col is BoxCollider box)
-        {
-            // 오브젝트의 Transform 위치/회전/스케일 반영
-            Gizmos.matrix = transform.localToWorldMatrix;
+//        // 2. Collider 종류(Box/Sphere)에 따른 영역 채우기 및 외곽선 그리기
+//        if (col is BoxCollider box)
+//        {
+//            // 오브젝트의 Transform 위치/회전/스케일 반영
+//            Gizmos.matrix = transform.localToWorldMatrix;
 
-            // 영역 박스
-            Gizmos.DrawCube(box.center, box.size);
+//            // 영역 박스
+//            Gizmos.DrawCube(box.center, box.size);
 
-            // 외곽선 (진한 노란색)
-            Gizmos.color = new Color(1f, 0.8f, 0f, 0.9f);
-            Gizmos.DrawWireCube(box.center, box.size);
-        }
-        else if (col is SphereCollider sphere)
-        {
-            Vector3 globalCenter = transform.TransformPoint(sphere.center);
-            float maxScale = Mathf.Max(transform.lossyScale.x, Mathf.Max(transform.lossyScale.y, transform.lossyScale.z));
-            float globalRadius = sphere.radius * maxScale;
+//            // 외곽선 (진한 노란색)
+//            Gizmos.color = new Color(1f, 0.8f, 0f, 0.9f);
+//            Gizmos.DrawWireCube(box.center, box.size);
+//        }
+//        else if (col is SphereCollider sphere)
+//        {
+//            Vector3 globalCenter = transform.TransformPoint(sphere.center);
+//            float maxScale = Mathf.Max(transform.lossyScale.x, Mathf.Max(transform.lossyScale.y, transform.lossyScale.z));
+//            float globalRadius = sphere.radius * maxScale;
 
-            Gizmos.DrawSphere(globalCenter, globalRadius);
+//            Gizmos.DrawSphere(globalCenter, globalRadius);
 
-            Gizmos.color = new Color(1f, 0.8f, 0f, 0.9f);
-            Gizmos.DrawWireSphere(globalCenter, globalRadius);
-        }
+//            Gizmos.color = new Color(1f, 0.8f, 0f, 0.9f);
+//            Gizmos.DrawWireSphere(globalCenter, globalRadius);
+//        }
 
-        // Gizmos 행렬 원복
-        Gizmos.matrix = Matrix4x4.identity;
+//        // Gizmos 행렬 원복
+//        Gizmos.matrix = Matrix4x4.identity;
 
-#if UNITY_EDITOR
-        // 3. 씬 뷰에 제한 속도 텍스트(GUI) 표 시
-        GUIStyle style = new GUIStyle();
-        style.normal.textColor = Color.yellow;
-        style.fontSize = 13;
-        style.fontStyle = FontStyle.Bold;
-        style.alignment = TextAnchor.MiddleCenter;
+//#if UNITY_EDITOR
+//        // 3. 씬 뷰에 제한 속도 텍스트(GUI) 표 시
+//        GUIStyle style = new GUIStyle();
+//        style.normal.textColor = Color.yellow;
+//        style.fontSize = 13;
+//        style.fontStyle = FontStyle.Bold;
+//        style.alignment = TextAnchor.MiddleCenter;
 
-        Vector3 labelPosition = transform.position + Vector3.up * 1.5f;
-        Handles.Label(labelPosition, $"[Speed Limit: {speedLimitKmh} km/h]", style);
-#endif
-    }
+//        Vector3 labelPosition = transform.position + Vector3.up * 1.5f;
+//        Handles.Label(labelPosition, $"[Speed Limit: {speedLimitKmh} km/h]", style);
+//#endif
+//    }
 
-    private void OnDrawGizmosSelected()
-    {
-        // 오브젝트를 클릭(선택)했을 때: 지원 경찰 수색 반경(빨간색 원) 표시
-        Gizmos.color = new Color(1f, 0f, 0f, 0.15f);
-        Gizmos.DrawSphere(transform.position, policeSearchRadius);
+//    private void OnDrawGizmosSelected()
+//    {
+//        // 오브젝트를 클릭(선택)했을 때: 지원 경찰 수색 반경(빨간색 원) 표시
+//        Gizmos.color = new Color(1f, 0f, 0f, 0.15f);
+//        Gizmos.DrawSphere(transform.position, policeSearchRadius);
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, policeSearchRadius);
-    }
+//        Gizmos.color = Color.red;
+//        Gizmos.DrawWireSphere(transform.position, policeSearchRadius);
+//    }
 
-    #endregion
+//    #endregion
 
 }

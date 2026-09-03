@@ -168,7 +168,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC18D\uB3C4 \uB2E8\uC18D \uAD6C\uC5ED\n\uC81C\uD55C\uC18D\uB3C4 40 km/h"
+  m_text: "\uC18D\uB3C4 \uB2E8\uC18D \uAD6C\uC5ED\n\uC81C\uD55C\uC18D\uB3C4 80 km/h"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: c887862439a6dd34194af4c9a6c09df8, type: 2}
   m_sharedMaterial: {fileID: -5714729009413219109, guid: c887862439a6dd34194af4c9a6c09df8, type: 2}

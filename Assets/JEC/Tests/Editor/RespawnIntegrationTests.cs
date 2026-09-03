@@ -198,7 +198,11 @@ public class RespawnIntegrationTests
 
         bike.Interact(player.gameObject);
         Assert.True(bike.IsMounted, "Remount after respawn");
-        Assert.True((bool)Call(detector, "TryProcessImpact", carCollider, 5f));
+        float vehicleImpactSpeed = Field<float>(detector, "vehicleImpactSpeed");
+        Assert.False((bool)Call(detector, "TryProcessImpact", carCollider, vehicleImpactSpeed - 0.01f),
+            "Vehicle contact below its separate threshold must not respawn");
+        Assert.True((bool)Call(detector, "TryProcessImpact", carCollider, vehicleImpactSpeed),
+            "Vehicle contact at its threshold must respawn");
         yield return new WaitForSecondsRealtime(5.5f);
         Assert.False(manager.IsRespawning);
         Assert.False(input.lockCharacterInput);

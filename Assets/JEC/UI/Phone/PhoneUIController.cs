@@ -32,6 +32,7 @@ public class PhoneUIController : MonoBehaviour
     public bool IsAnimating => isAnimating;
 
     public event Action StateChanged;
+    public event Action TransitionStarted;
 
     private void Awake()
     {
@@ -90,6 +91,7 @@ public class PhoneUIController : MonoBehaviour
     private IEnumerator OpenPhoneRoutine()
     {
         isAnimating = true;
+        TransitionStarted?.Invoke();
 
         Vector2 liftedPosition = closedPosition + Vector2.up * liftDistance;
 
@@ -108,6 +110,7 @@ public class PhoneUIController : MonoBehaviour
     private IEnumerator ClosePhoneRoutine()
     {
         isAnimating = true;
+        TransitionStarted?.Invoke();
 
         Vector2 liftedPosition = closedPosition + Vector2.up * liftDistance;
 

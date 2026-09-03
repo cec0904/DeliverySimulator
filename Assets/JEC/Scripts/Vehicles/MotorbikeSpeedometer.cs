@@ -9,6 +9,8 @@ public sealed class MotorbikeSpeedometer : MonoBehaviour
     [SerializeField] private TMP_Text unitText;
     [SerializeField] private string unitLabel = "km/h";
     [SerializeField] private bool showUnit = true;
+    [Tooltip("Uses the parent phone controller when left empty.")]
+    [SerializeField] private PhoneUIController phoneUIController;
     private int displayedSpeed = int.MinValue;
 
     private void Awake()
@@ -22,10 +24,45 @@ public sealed class MotorbikeSpeedometer : MonoBehaviour
         SetVisible(false);
     }
 
+    private void OnEnable()
+    {
+        if (phoneUIController == null)
+        {
+            phoneUIController = GetComponentInParent<PhoneUIController>(true);
+        }
+
+        if (phoneUIController != null)
+        {
+            // Hide before the opening animation moves the phone, regardless of Update order.
+            phoneUIController.TransitionStarted += RefreshDisplay;
+            phoneUIController.StateChanged += RefreshDisplay;
+        }
+
+        RefreshDisplay();
+    }
+
+    private void OnDisable()
+    {
+        if (phoneUIController != null)
+        {
+            phoneUIController.TransitionStarted -= RefreshDisplay;
+            phoneUIController.StateChanged -= RefreshDisplay;
+        }
+
+        SetVisible(false);
+    }
+
     private void Update()
     {
+        RefreshDisplay();
+    }
+
+    private void RefreshDisplay()
+    {
         MotorbikeMount motorbike = MotorbikeMount.MountedBike;
-        bool visible = motorbike != null && motorbike.IsMounted && motorbike.Bicycle != null;
+        bool phoneClosed = phoneUIController == null ||
+                           (!phoneUIController.IsOpen && !phoneUIController.IsAnimating);
+        bool visible = motorbike != null && motorbike.IsMounted && motorbike.Bicycle != null && phoneClosed;
         SetVisible(visible);
 
         if (!visible || speedText == null)

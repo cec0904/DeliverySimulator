@@ -3,13 +3,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.Linq;
 using UnityEngine.Animations.Rigging;
-using static UnityEditor.Rendering.ShadowCascadeGUI;
 using Unity.VisualScripting;
 //using Palmmedia.ReportGenerator.Core.Parser.Analysis;
 using static UnityEngine.Rendering.DebugUI.Table;
+#if UNITY_EDITOR
+using UnityEditor;
+using static UnityEditor.Rendering.ShadowCascadeGUI;
+#endif
 //Requirements
 [DisallowMultipleComponent]
 [RequireComponent(typeof(Rigidbody))]
@@ -343,6 +345,7 @@ public class Player : MonoBehaviour
         }
     }
     //Show Settings
+#if UNITY_EDITOR
     [CustomEditor(typeof(Player))]
     public class ShowSettings : Editor
     {
@@ -356,6 +359,7 @@ public class Player : MonoBehaviour
             }
         }
     }
+#endif
     //Controller
     void Start()
     {

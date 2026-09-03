@@ -25,6 +25,12 @@ public class UIManager : MonoBehaviour
     [Header("[ 인게임 HUD ]")]
     [SerializeField] private GameObject inventoryHUD;
 
+    // Shared input ownership; independent of the cursor position and time scale.
+    public bool IsCameraInputBlocked => IsAnyPopupOpen() ||
+        (mainMenuManager != null && mainMenuManager.IsOpen);
+    public int LastCameraInputStateChangeFrame { get; private set; } = -1;
+    private bool wasCameraInputBlocked;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -35,8 +41,11 @@ public class UIManager : MonoBehaviour
     {
         if (phoneUIController != null)
         {
+            phoneUIController.TransitionStarted += UpdateGameState;
             phoneUIController.StateChanged += UpdateGameState;
         }
+
+        UpdateGameState();
     }
 
     private void Start()
@@ -198,8 +207,12 @@ public class UIManager : MonoBehaviour
 
     private void UpdateGameState()
     {
-        bool isMainMenuOpen = mainMenuManager != null && mainMenuManager.IsOpen;
-        bool isAnyUIOpen = IsAnyPopupOpen() || isMainMenuOpen;
+        bool isAnyUIOpen = IsCameraInputBlocked;
+        if (isAnyUIOpen != wasCameraInputBlocked)
+        {
+            wasCameraInputBlocked = isAnyUIOpen;
+            LastCameraInputStateChangeFrame = Time.frameCount;
+        }
         //Debug.Log($"[UpdateGameState] isMainMenuOpen: {isMainMenuOpen} | IsAnyPopupOpen(): {IsAnyPopupOpen()} => isAnyUIOpen: {isAnyUIOpen}");
         // UI 열려 있으면 마우스 가능, 시간 제어
         Cursor.visible = isAnyUIOpen;
@@ -216,17 +229,18 @@ public class UIManager : MonoBehaviour
 
     private void OnDisable()
     {
+        if (phoneUIController != null)
+        {
+            phoneUIController.TransitionStarted -= UpdateGameState;
+            phoneUIController.StateChanged -= UpdateGameState;
+        }
+
         // 스크립트 비활성화 시 timeScale 원복 안전장치
         Time.timeScale = 1f;
     }
 
     private void OnDestroy()
     {
-        if (phoneUIController != null)
-        {
-            phoneUIController.StateChanged -= UpdateGameState;
-        }
-
         Time.timeScale = 1f;
     }
 

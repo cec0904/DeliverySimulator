@@ -4,6 +4,16 @@ using Invector.vCharacterController;
 public class CameraZoomin : MonoBehaviour
 {
     private vThirdPersonCamera tpCamera;
+    private bool waitForNeutralScroll;
+    private const float ScrollQuietPeriod = 0.1f;
+    private float scrollQuietUntil;
+
+    private void OnEnable()
+    {
+        // Do not inherit a wheel gesture when the camera/component is re-enabled.
+        waitForNeutralScroll = true;
+        scrollQuietUntil = Time.unscaledTime + ScrollQuietPeriod;
+    }
 
     [Header("줌 속도 및 범위 설정")]
     public float zoomSpeed = 2.0f;       // 마우스 휠 감도
@@ -21,11 +31,38 @@ public class CameraZoomin : MonoBehaviour
         }
     }
 
-    void Update()
+    void LateUpdate()
     {
         if (tpCamera == null) return;
 
-        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+        // UI keyboard/button handlers and phone animation callbacks run first.
+        ProcessScroll(Input.GetAxis("Mouse ScrollWheel"));
+    }
+
+    private void ProcessScroll(float scrollInput)
+    {
+        UIManager ui = UIManager.Instance;
+        bool uiOwnsThisFrame = ui != null &&
+            (ui.IsCameraInputBlocked || ui.LastCameraInputStateChangeFrame == Time.frameCount);
+
+        if (uiOwnsThisFrame || Time.timeScale <= 0f)
+        {
+            waitForNeutralScroll = true;
+            scrollQuietUntil = Time.unscaledTime + ScrollQuietPeriod;
+            return;
+        }
+
+        // Discard the closing frame and any continuing UI scroll. Only a new
+        // gesture after a short quiet period may change the world-camera distance.
+        // OS wheel events may arrive a frame later than the UI close callback.
+        if (waitForNeutralScroll)
+        {
+            if (Mathf.Abs(scrollInput) > 0.01f)
+                scrollQuietUntil = Time.unscaledTime + ScrollQuietPeriod;
+            else if (Time.unscaledTime >= scrollQuietUntil)
+                waitForNeutralScroll = false;
+            return;
+        }
 
         if (Mathf.Abs(scrollInput) > 0.01f)
         {

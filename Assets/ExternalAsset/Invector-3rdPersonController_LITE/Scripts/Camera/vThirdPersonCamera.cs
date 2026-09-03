@@ -55,8 +55,24 @@ public class vThirdPersonCamera : MonoBehaviour
     private float xMaxLimit = 360f;
     private float cullingHeight = 0.2f;
     private float cullingMinDist = 0.1f;
+    private Vector2 pendingRotationInput;
+    private float rotationInputResumeAt;
+    private const float RotationInputResumeDelay = 0.1f;
 
     #endregion
+
+    void OnEnable()
+    {
+        pendingRotationInput = Vector2.zero;
+        movementSpeed = Vector2.zero;
+        rotationInputResumeAt = Time.unscaledTime + RotationInputResumeDelay;
+    }
+
+    void OnDisable()
+    {
+        pendingRotationInput = Vector2.zero;
+        movementSpeed = Vector2.zero;
+    }
 
     void Start()
     {
@@ -125,6 +141,39 @@ public class vThirdPersonCamera : MonoBehaviour
     /// <param name="x"></param>
     /// <param name="y"></param>
     public void RotateCamera(float x, float y)
+    {
+        // Collect input without changing the look angles before UI Update has
+        // handled Q/M/ESC or button callbacks in the same frame.
+        pendingRotationInput += new Vector2(x, y);
+    }
+
+    void LateUpdate()
+    {
+        Vector2 input = pendingRotationInput;
+        pendingRotationInput = Vector2.zero;
+
+        UIManager ui = UIManager.Instance;
+        bool uiOwnsThisFrame = ui != null &&
+            (ui.IsCameraInputBlocked || ui.LastCameraInputStateChangeFrame == Time.frameCount);
+        if (uiOwnsThisFrame || Time.timeScale <= 0f)
+        {
+            movementSpeed = Vector2.zero;
+            rotationInputResumeAt = Time.unscaledTime + RotationInputResumeDelay;
+            return;
+        }
+
+        // Cursor re-lock can produce a delayed mouse delta. Discard those first
+        // samples, then resume fresh movement without requiring the mouse to stop.
+        if (Time.unscaledTime < rotationInputResumeAt)
+        {
+            movementSpeed = Vector2.zero;
+            return;
+        }
+
+        ApplyRotationInput(input.x, input.y);
+    }
+
+    private void ApplyRotationInput(float x, float y)
     {
         // free rotation 
         mouseX += x * xMouseSensitivity;

@@ -311,6 +311,7 @@ GameObject:
   - component: {fileID: 7326359121347261855}
   - component: {fileID: 6817966432024043158}
   - component: {fileID: 4744701281626857796}
+  - component: {fileID: 910000000000000006}
   m_Layer: 2
   m_Name: MotorBike_Prefab
   m_TagString: Untagged
@@ -318,6 +319,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &910000000000000006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1270371803142626377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1a2b3c4d5e64f708192a3b4c5d6e706, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::MotorbikeCrashDetector
+  minimumImpactSpeed: 4
 --- !u!4 &6910495001352585428
 Transform:
   m_ObjectHideFlags: 0

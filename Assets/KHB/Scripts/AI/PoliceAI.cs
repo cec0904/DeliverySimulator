@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 using rayzngames;
-using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
@@ -128,8 +127,29 @@ public class PoliceAI : MonoBehaviour
                 animator.SetFloat("Speed", 0f);
             }
         }
-        SceneManager.LoadScene(
-        SceneManager.GetActiveScene().buildIndex);
+        bool respawnStarted = RespawnManager.TryRequestRespawn(
+            RespawnReason.PoliceArrest,
+            targetToChase
+        );
+
+        if (respawnStarted)
+        {
+            if (sourceCar != null)
+            {
+                Destroy(sourceCar);
+            }
+
+            Destroy(gameObject);
+        }
+        else
+        {
+            isChasing = true;
+
+            if (agent.enabled)
+            {
+                agent.isStopped = false;
+            }
+        }
     }
 
     private void GiveUpChase()

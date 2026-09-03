@@ -61,6 +61,7 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
+        if (RespawnManager.IsTransitionActive) return;
         if (KeyManager.Instance == null || KeyManager.Instance.IsWaitingForKey) return;
         if (Input.GetKeyDown(KeyManager.Instance.menuKey))
         {

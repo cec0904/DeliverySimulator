@@ -26,6 +26,7 @@ public sealed class MotorbikeMount : Interactable
     private BicycleVehicle bicycle;
     private BikeControlsExample bikeControls;
     private Rigidbody bikeRigidbody;
+    private WheelCollider[] bikeWheels;
     private RigidbodyConstraints bikeConstraintsBeforeMount;
     private BikeIKTargets bikeIKTargets;
     private RiderBikeIKState riderBikeIKState;
@@ -62,6 +63,15 @@ public sealed class MotorbikeMount : Interactable
     private Transform packagedRightKneeHint;
 
     public bool IsMounted => rider != null;
+    public Transform CurrentRider => rider;
+    public BicycleVehicle Bicycle => bicycle;
+    public static MotorbikeMount MountedBike { get; private set; }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetMountedBike()
+    {
+        MountedBike = null;
+    }
 
     public override string GetPromptMessage(GameObject interactor)
     {
@@ -98,6 +108,7 @@ public sealed class MotorbikeMount : Interactable
         bicycle = GetComponent<BicycleVehicle>();
         bikeControls = GetComponent<BikeControlsExample>();
         bikeRigidbody = GetComponent<Rigidbody>();
+        bikeWheels = GetComponentsInChildren<WheelCollider>(true);
         bikeIKTargets = GetComponent<BikeIKTargets>();
         ResolvePackagedRigReferences();
         DisablePackagedRider();
@@ -126,7 +137,7 @@ public sealed class MotorbikeMount : Interactable
 
         ApplyRiderMountPose();
 
-        if (Time.time >= nextInputTime && Input.GetKeyDown(dismountKey))
+        if (!RespawnManager.IsTransitionActive && Time.time >= nextInputTime && Input.GetKeyDown(dismountKey))
         {
             Dismount();
         }
@@ -134,7 +145,7 @@ public sealed class MotorbikeMount : Interactable
 
     public override void Interact(GameObject interactor)
     {
-        if (interactor == null || Time.time < nextInputTime)
+        if (interactor == null || RespawnManager.IsTransitionActive || Time.time < nextInputTime)
         {
             return;
         }
@@ -153,6 +164,7 @@ public sealed class MotorbikeMount : Interactable
     private void Mount(Transform newRider)
     {
         rider = newRider;
+        MountedBike = this;
         riderOriginalParent = rider.parent;
         riderInput = rider.GetComponent<vThirdPersonInput>();
         riderControllers = rider.GetComponents<vThirdPersonMotor>();
@@ -391,8 +403,70 @@ public sealed class MotorbikeMount : Interactable
         SetCameraTarget(departingRider);
 
         rider = null;
+        if (MountedBike == this)
+        {
+            MountedBike = null;
+        }
         promptMessage = "오토바이에 탑승하려면 F를 누르세요.";
         nextInputTime = Time.time + inputCooldown;
+    }
+
+    public void PrepareForRespawn()
+    {
+        SetBikeControl(false);
+        StopBikePhysics();
+    }
+
+    public bool TryDismountForRespawn()
+    {
+        if (rider == null)
+        {
+            return false;
+        }
+
+        Dismount();
+        return true;
+    }
+
+    public void Relocate(Vector3 position, Quaternion rotation)
+    {
+        if (IsMounted)
+        {
+            return;
+        }
+
+        SetBikeControl(false);
+        StopBikePhysics();
+
+        if (bikeRigidbody != null)
+        {
+            // Interpolated bodies otherwise expose the previous rendered pose
+            // until the next physics step, including to summon distance checks.
+            RigidbodyInterpolation interpolation = bikeRigidbody.interpolation;
+            bikeRigidbody.interpolation = RigidbodyInterpolation.None;
+            transform.SetPositionAndRotation(position, rotation);
+            bikeRigidbody.position = position;
+            bikeRigidbody.rotation = rotation;
+            bikeRigidbody.interpolation = interpolation;
+        }
+        else
+        {
+            transform.SetPositionAndRotation(position, rotation);
+        }
+
+        Physics.SyncTransforms();
+        StopBikePhysics();
+    }
+
+    private void StopBikePhysics()
+    {
+        if (bikeRigidbody == null)
+        {
+            return;
+        }
+
+        bikeRigidbody.linearVelocity = Vector3.zero;
+        bikeRigidbody.angularVelocity = Vector3.zero;
     }
 
     private static void ResetRiderControllerState(vThirdPersonMotor controller)
@@ -422,6 +496,18 @@ public sealed class MotorbikeMount : Interactable
         if (!active)
         {
             bicycle.ConstrainRotation(true);
+
+            // InControl(false) skips BicycleVehicle.HandleEngine, so clear the
+            // previously applied WheelCollider torque here as well.
+            if (bikeWheels != null)
+            {
+                foreach (WheelCollider wheel in bikeWheels)
+                {
+                    if (wheel == null) continue;
+                    wheel.motorTorque = 0f;
+                    wheel.brakeTorque = bicycle.brakeForce;
+                }
+            }
         }
 
         // BicycleVehicle이 Constraints를 변경한 뒤 다시 강제로 적용

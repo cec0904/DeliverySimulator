@@ -58,9 +58,13 @@ public class CameraZoomin : MonoBehaviour
         if (waitForNeutralScroll)
         {
             if (Mathf.Abs(scrollInput) > 0.01f)
+            {
                 scrollQuietUntil = Time.unscaledTime + ScrollQuietPeriod;
+            }
             else if (Time.unscaledTime >= scrollQuietUntil)
+            {
                 waitForNeutralScroll = false;
+            }
             return;
         }
 

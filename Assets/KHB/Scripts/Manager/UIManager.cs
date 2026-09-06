@@ -166,8 +166,8 @@ public class UIManager : MonoBehaviour
     private bool IsAnyPopupOpen()
     {
         bool mapOpen = mapPanel != null && mapPanel.activeSelf;
-        //bool questOpen = questPanel != null && questPanel.activeSelf;
-        bool questOpen = phoneUIController != null && (phoneUIController.IsOpen || phoneUIController.IsAnimating);
+        bool questOpen = phoneUIController != null && 
+            (phoneUIController.IsOpen || phoneUIController.IsAnimating);
         bool invOpen = inventoryPanel != null && inventoryPanel.activeSelf;
         bool keySettingOpen = keySettingPanel != null && keySettingPanel.activeSelf;
 

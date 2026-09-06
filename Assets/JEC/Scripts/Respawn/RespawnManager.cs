@@ -96,9 +96,7 @@ public sealed class RespawnManager : MonoBehaviour
             return false;
         }
 
-        Transform targetPoint = reason == RespawnReason.PoliceArrest
-            ? policeRespawnPoint
-            : hospitalRespawnPoint;
+        Transform targetPoint = reason == RespawnReason.PoliceArrest ? policeRespawnPoint : hospitalRespawnPoint;
 
         Transform targetPlayer = playerOverride != null ? playerOverride : player;
 

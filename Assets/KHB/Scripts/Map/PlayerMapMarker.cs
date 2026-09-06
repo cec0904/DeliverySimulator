@@ -71,12 +71,12 @@ public class PlayerMapMarker : MonoBehaviour
             return false;
         }
 
-        bool insideLocktStore =
+        bool insideRockAssort=
             IsInsideWorldRegion(worldPosition, locktStoreWorldCenter, locktStoreWorldSize);
         bool insideShinju =
             IsInsideWorldRegion(worldPosition, shinjuWorldCenter, shinjuWorldSize);
 
-        if (insideLocktStore && insideShinju)
+        if (insideRockAssort&& insideShinju)
         {
             float locktStoreDistance = GetNormalizedRegionDistance(
                 worldPosition,
@@ -89,18 +89,16 @@ public class PlayerMapMarker : MonoBehaviour
                 shinjuWorldSize
             );
 
-            insideLocktStore = locktStoreDistance <= shinjuDistance;
-            insideShinju = !insideLocktStore;
+            insideRockAssort= locktStoreDistance <= shinjuDistance;
+            insideShinju = !insideRockAssort;
         }
 
-        if (insideLocktStore &&
-            TryMapToRect(worldPosition, locktStoreWorldCenter, locktStoreWorldSize, locktStoreMapRect, out mapPosition))
+        if (insideRockAssort && TryMapToRect(worldPosition, locktStoreWorldCenter, locktStoreWorldSize, locktStoreMapRect, out mapPosition))
         {
             return true;
         }
 
-        if (insideShinju &&
-            TryMapToRect(worldPosition, shinjuWorldCenter, shinjuWorldSize, shinjuMapRect, out mapPosition))
+        if (insideShinju && TryMapToRect(worldPosition, shinjuWorldCenter, shinjuWorldSize, shinjuMapRect, out mapPosition))
         {
             return true;
         }
@@ -121,7 +119,9 @@ public class PlayerMapMarker : MonoBehaviour
         );
 
         if (TryNormalizedToRect(normalizedX, normalizedY, exteriorMapRect, out mapPosition))
+        {
             return true;
+        }
 
         mapPosition = new Vector2(
             (Mathf.Clamp01(normalizedX) - 0.5f) * mapContent.rect.width,

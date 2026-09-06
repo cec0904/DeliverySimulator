@@ -230,13 +230,7 @@ public sealed class MotorbikeSummoner : MonoBehaviour
 
                 Vector3 checkCenter = hit.point + Vector3.up * (halfExtents.y + placementClearance);
 
-                Collider[] overlaps = Physics.OverlapBox(
-                    checkCenter,
-                    halfExtents,
-                    placementRotation,
-                    obstacleLayerMask,
-                    QueryTriggerInteraction.Ignore
-                );
+                Collider[] overlaps = Physics.OverlapBox(checkCenter, halfExtents, placementRotation, obstacleLayerMask, QueryTriggerInteraction.Ignore);
 
                 if (HasBlockingOverlap(overlaps) || !HasGroundSupport(hit.point, halfExtents, placementRotation))
                 {

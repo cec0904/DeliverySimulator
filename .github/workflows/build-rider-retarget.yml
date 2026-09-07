@@ -1,0 +1,55 @@
+name: Build Rider Retarget
+
+on:
+  push:
+    branches:
+      - ai/rider-retarget-20260907
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[rider-generated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Blender and FBX dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y blender python3-numpy libegl1 libgl1 libglx-mesa0
+          blender --version
+          python3 -c "import numpy; print(numpy.__version__)"
+
+      - name: Build rider FBX and preview
+        run: |
+          blender --background --python .github/scripts/build_rider_retarget.py
+          test -s Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_RagRig.fbx
+          test -s Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_preview.png
+          ls -lh Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_RagRig.fbx Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_preview.png
+
+      - name: Commit generated assets
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_RagRig.fbx Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_preview.png
+          git commit -m "[rider-generated] Build ParkourBikeRider asset" || exit 0
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Upload rider package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ParkourBikeRider_RagRig
+          path: |
+            Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_RagRig.fbx
+            Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_preview.png
+            Assets/JEC/Generated/RiderRetarget/Editor/CreateParkourBikeRiderPrefab.cs
+          if-no-files-found: error

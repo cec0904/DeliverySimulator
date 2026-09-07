@@ -4,13 +4,16 @@ on:
   push:
     branches:
       - ai/rider-retarget-20260907
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
 
 jobs:
   build:
-    if: ${{ !contains(github.event.head_commit.message, '[rider-generated]') }}
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[rider-generated]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,6 +31,7 @@ jobs:
         run: blender --background --python .github/scripts/build_rider_retarget.py
 
       - name: Commit generated assets
+        if: ${{ github.event_name == 'push' }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

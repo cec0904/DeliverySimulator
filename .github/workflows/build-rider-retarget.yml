@@ -24,7 +24,7 @@ jobs:
       - name: Install Blender and FBX dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender python3-numpy
+          sudo apt-get install -y blender python3-numpy libegl1 libgl1 libglx-mesa0
           blender --version
           python3 -c "import numpy; print(numpy.__version__)"
 

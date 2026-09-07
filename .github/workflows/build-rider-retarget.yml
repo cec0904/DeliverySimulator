@@ -21,14 +21,19 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Blender
+      - name: Install Blender and FBX dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
           blender --version
+          python3 -c "import numpy; print(numpy.__version__)"
 
       - name: Build rider FBX and preview
-        run: blender --background --python .github/scripts/build_rider_retarget.py
+        run: |
+          blender --background --python .github/scripts/build_rider_retarget.py
+          test -s Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_RagRig.fbx
+          test -s Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_preview.png
+          ls -lh Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_RagRig.fbx Assets/JEC/Generated/RiderRetarget/ParkourBikeRider_preview.png
 
       - name: Commit generated assets
         if: ${{ github.event_name == 'push' }}
